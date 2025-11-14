@@ -182,11 +182,11 @@ export default function App() {
     <div className="min-h-screen bg-[#0a0b0f] flex items-center justify-center p-4">
       <div className="w-full  flex items-center justify-evenly gap-4">
         <div className="flex flex-col items-center gap-32">
-          <div className="flex items-center gap-2">
+          <div onClick={() => window.open('https://x.com/MeteoraAG', '_blank')} className="flex items-center gap-2 cursor-pointer">
           <img src={metlogo} alt="logo" className="w-30 h-30" />
           <p className="text-white text-[25px] font-bold ">Meteora</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div onClick={() => window.open('https://x.com/met_lparmy', '_blank')} className="flex items-center gap-2 cursor-pointer">
           <img src={lplogo} alt="logo" className="w-30 h-30" />
           <p className="text-white text-[22px] font-bold ">LP Army</p>
           </div>
@@ -432,7 +432,7 @@ export default function App() {
             </div>
           </div>
         </div>
-        <div className="flex flex-col items-center gap-2">
+        <div onClick={() => window.open('https://x.com/biginthe4teen', '_blank')} className="flex flex-col items-center gap-2 cursor-pointer">
         <div className="border-2 border-red-900 rounded-full">
           <img src={luffy} alt="logo" className="w-25 h-25 rounded-full" />
         </div>
