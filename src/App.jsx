@@ -104,21 +104,21 @@ export default function App() {
     // Bid mode: starts from right, paints green going left, unpaints going right
     if (mode === 'bid') {
       // Bins on the RIGHT are painted/unpainted based on currentWave position
-      if (index > currentWave) return '#10B981';
+      if (index > currentWave) return '#4267B2';
     } else if (mode === 'both') {
       // Both mode: animation behavior based on which side of dynamic center
       if (index < dynamicCenter) {
         // Left side (Bid): paint green as wave passes
-        if (index < currentWave && currentWave <= dynamicCenter) return '#10B981';
-        if (index >= currentWave && currentWave > dynamicCenter) return '#10B981';
+        if (index < currentWave && currentWave <= dynamicCenter) return '#4267B2';
+        if (index >= currentWave && currentWave > dynamicCenter) return '#4267B2';
       } else {
         // Right side (Ask): paint green as wave passes
-        if (index < currentWave) return '#10B981';
+        if (index < currentWave) return '#4267B2';
       }
     } else {
       // Ask/Combined: starts from left, paints right to left  
       // Bins on the LEFT are painted/unpainted based on currentWave position
-      if (index < currentWave) return '#10B981';
+      if (index < currentWave) return '#4267B2';
     }
     
     // Default colors for bins that haven't been covered
@@ -172,11 +172,13 @@ export default function App() {
         <div className="bg-[#1a1b23] w-[500px] rounded-2xl p-6 shadow-2xl border border-gray-800"
           style={{ boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3)' }}>
           
-          {/* Header */}
-          <div className="mb-5">
-            <h1 className="text-2xl font-bold text-white">Liquidity Position</h1>
-            <p className="text-sm text-red-500 font-bold mt-1">This is just an example UI of how my Bid/Ask strategy works to make it easy to understand.</p>
-          </div>
+            {/* Header */}
+            <div className="mb-5">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-red-800 via-red-500 to-orange-900 bg-clip-text text-transparent">
+                GIGA DEGAN
+              </h1>
+              <p className="text-sm text-white font-bold mt-1">This is just an example UI of how my Bid/Ask strategy works to make it easy to understand.</p>
+            </div>
 
           {/* Chart - Dark */}
           <div className="h-48 bg-[#0f1015] rounded-xl p-3 mb-5 border border-gray-800">
@@ -272,7 +274,7 @@ export default function App() {
                 <input
                   type="range"
                   min="10"
-                  max="40"
+                  max="100"
                   value={binSteps}
                   onChange={(e) => setBinSteps(parseInt(e.target.value))}
                   className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
