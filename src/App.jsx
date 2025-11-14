@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { TrendingUp, TrendingDown, BarChart3 } from 'lucide-react';
+import { TrendingUp, TrendingDown, BarChart3, X } from 'lucide-react';
 import metlogo from './assets/metlogo.png';
 import luffy from './assets/luggy.JPG';
+import lplogo from './assets/lplogo.png';
 
 export default function App() {
   const [mode, setMode] = useState('combined');
@@ -108,12 +109,12 @@ export default function App() {
     } else if (mode === 'both') {
       // Both mode: animation behavior based on which side of dynamic center
       if (index < dynamicCenter) {
-        // Left side (Bid): paint green as wave passes
-        if (index < currentWave && currentWave <= dynamicCenter) return '#4267B2';
-        if (index >= currentWave && currentWave > dynamicCenter) return '#4267B2';
+        // Left side (Bid): paint blue gradually from center (lowest) outward as wave moves left
+        // When wave is on left side (currentWave < dynamicCenter), paint from wave position to center
+        if (currentWave < dynamicCenter && index >= currentWave && index < dynamicCenter) return '#4267B2';
       } else {
-        // Right side (Ask): paint green as wave passes
-        if (index < currentWave) return '#4267B2';
+        // Right side (Ask): paint blue as wave passes
+        if (index >= dynamicCenter && index <= currentWave) return '#4267B2';
       }
     } else {
       // Ask/Combined: starts from left, paints right to left  
@@ -165,8 +166,15 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#0a0b0f] flex items-center justify-center p-4">
       <div className="w-full  flex items-center justify-evenly gap-4">
-        <div className="">
+        <div className="flex flex-col items-center gap-32">
+          <div className="flex items-center gap-2">
           <img src={metlogo} alt="logo" className="w-30 h-30" />
+          <p className="text-white text-[25px] font-bold ">Meteora</p>
+          </div>
+          <div className="flex items-center gap-2">
+          <img src={lplogo} alt="logo" className="w-30 h-30" />
+          <p className="text-white text-[22px] font-bold ">LP Army</p>
+          </div>
         </div>
         {/* Dark Enterprise Card */}
         <div className="bg-[#1a1b23] w-[500px] rounded-2xl p-6 shadow-2xl border border-gray-800"
@@ -175,7 +183,7 @@ export default function App() {
             {/* Header */}
             <div className="mb-5">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-red-800 via-red-500 to-orange-900 bg-clip-text text-transparent">
-                GIGA DEGAN
+                BidAsk for GIGA DEGAN
               </h1>
               <p className="text-sm text-white font-bold mt-1">This is just an example UI of how my Bid/Ask strategy works to make it easy to understand.</p>
             </div>
@@ -402,9 +410,13 @@ export default function App() {
             </div>
           </div>
         </div>
-        <div className="border-2 border-white rounded-full">
-          <img src={luffy} alt="logo" className="w-30 h-30 rounded-full" />
+        <div className="flex flex-col items-center gap-2">
+        <div className="border-2 border-red-900 rounded-full">
+          <img src={luffy} alt="logo" className="w-25 h-25 rounded-full" />
         </div>
+        <p className="text-white text-[18px] font-bold ">@biginthe4teen</p>
+        </div>
+
       </div>
     </div>
   );
