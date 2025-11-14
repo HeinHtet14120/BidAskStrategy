@@ -179,32 +179,32 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0a0b0f] flex items-center justify-center p-4">
-      <div className="w-full  flex items-center justify-evenly gap-4">
-        <div className="flex flex-col items-center gap-32">
+    <div className="min-h-screen bg-[#0a0b0f] flex items-center justify-center p-2 sm:p-4">
+      <div className="w-full flex flex-col lg:flex-row items-center justify-center lg:justify-evenly gap-4 lg:gap-4">
+        <div className="flex flex-row lg:flex-col items-center justify-center gap-4 lg:gap-32 order-2 lg:order-1">
           <div onClick={() => window.open('https://x.com/MeteoraAG', '_blank')} className="flex items-center gap-2 cursor-pointer">
-          <img src={metlogo} alt="logo" className="w-30 h-30" />
-          <p className="text-white text-[25px] font-bold ">Meteora</p>
+          <img src={metlogo} alt="logo" className="w-20 h-20 sm:w-30 sm:h-30" />
+          <p className="text-white text-lg sm:text-[25px] font-bold">Meteora</p>
           </div>
           <div onClick={() => window.open('https://x.com/met_lparmy', '_blank')} className="flex items-center gap-2 cursor-pointer">
-          <img src={lplogo} alt="logo" className="w-30 h-30" />
-          <p className="text-white text-[22px] font-bold ">LP Army</p>
+          <img src={lplogo} alt="logo" className="w-20 h-20 sm:w-30 sm:h-30" />
+          <p className="text-white text-base sm:text-[22px] font-bold">LP Army</p>
           </div>
         </div>
         {/* Dark Enterprise Card */}
-        <div className="bg-[#1a1b23] w-[500px] rounded-2xl p-4 shadow-2xl border border-gray-800"
+        <div className="bg-[#1a1b23] w-full max-w-[500px] rounded-2xl p-3 sm:p-4 shadow-2xl border border-gray-800 order-1 lg:order-2"
           style={{ boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3)' }}>
           
             {/* Header */}
-            <div className="mb-5">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-red-800 via-red-800 to-orange-900 bg-clip-text text-transparent">
+            <div className="mb-4 sm:mb-5">
+              <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-red-800 via-red-800 to-orange-900 bg-clip-text text-transparent">
                 BidAsk for GIGA DEGENS
               </h1>
-              <p className="text-sm text-white font-bold mt-1">This is just an example UI of how my Bid/Ask strategy works to make it easy to understand.</p>
+              <p className="text-xs sm:text-sm text-white font-bold mt-1">This is just an example UI of how my Bid/Ask strategy works to make it easy to understand.</p>
             </div>
 
           {/* Chart - Dark */}
-          <div className="h-48 bg-[#0f1015] rounded-xl p-3 mb-5 border border-gray-800">
+          <div className="h-40 sm:h-48 bg-[#0f1015] rounded-xl p-2 sm:p-3 mb-4 sm:mb-5 border border-gray-800">
             <div className="flex items-end justify-between gap-px h-full relative">
               {bars.map((bar, index) => (
                 <div
@@ -248,11 +248,11 @@ export default function App() {
           </div>
 
           {/* Buttons - Dark style */}
-          <div className="flex justify-center gap-2 mb-5">
+          <div className="flex justify-center gap-2 mb-4 sm:mb-5">
             {mode === 'combined' ? (
               <button
                 onClick={() => setMode('both')}
-                className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-purple-600 to-orange-600 hover:from-purple-700 hover:to-orange-700 text-white rounded-lg text-sm font-semibold transition-all shadow-lg"
+                className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-purple-600 to-orange-600 hover:from-purple-700 hover:to-orange-700 text-white rounded-lg text-xs sm:text-sm font-semibold transition-all shadow-lg"
               >
                 <BarChart3 className="w-4 h-4" />
                 <TrendingUp className="w-4 h-4" />
@@ -262,7 +262,7 @@ export default function App() {
               <>
                 <button
                   onClick={() => setMode('bid')}
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+                  className={`flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                     mode === 'bid'
                       ? 'bg-orange-600 text-white shadow-lg'
                       : 'bg-[#0f1015] text-gray-400 hover:bg-[#15161d] border border-gray-800'
@@ -273,7 +273,7 @@ export default function App() {
                 </button>
                 <button
                   onClick={() => setMode('ask')}
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+                  className={`flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                     mode === 'ask'
                       ? 'bg-purple-600 text-white shadow-lg'
                       : 'bg-[#0f1015] text-gray-400 hover:bg-[#15161d] border border-gray-800'
@@ -287,12 +287,12 @@ export default function App() {
           </div>
 
           {/* Settings Panel */}
-          <div className="bg-[#0f1015] rounded-xl p-4 mb-4 border border-gray-800">
+          <div className="bg-[#0f1015] rounded-xl p-3 sm:p-4 mb-3 sm:mb-4 border border-gray-800">
             <div className="space-y-3">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-gray-400 text-sm font-medium">Bin Steps</label>
-                  <span className="text-white text-sm font-semibold">{binSteps}</span>
+                  <label className="text-gray-400 text-xs sm:text-sm font-medium">Bin Steps</label>
+                  <span className="text-white text-xs sm:text-sm font-semibold">{binSteps}</span>
                 </div>
                 <input
                   type="range"
@@ -312,10 +312,10 @@ export default function App() {
               {mode !== 'both' && (
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-gray-400 text-sm font-medium">
+                    <label className="text-gray-400 text-xs sm:text-sm font-medium">
                       {mode === 'bid' ? 'SOL' : mode === 'ask' ? 'Token Amount' : 'Coin Amount'}
                     </label>
-                    <span className="text-white text-sm font-semibold">
+                    <span className="text-white text-xs sm:text-sm font-semibold">
                       {mode === 'bid' 
                         ? `${(coinAmount / 1000).toFixed(1)} SOL`
                         : mode === 'ask'
@@ -342,8 +342,8 @@ export default function App() {
                 <>
                   <div className="pt-2 border-t border-gray-800">
                     <div className="flex items-center justify-between mb-2">
-                      <label className="text-gray-400 text-sm font-medium">SOL Amount</label>
-                      <span className="text-orange-400 text-sm font-semibold">{solPercent}%</span>
+                      <label className="text-gray-400 text-xs sm:text-sm font-medium">SOL Amount</label>
+                      <span className="text-orange-400 text-xs sm:text-sm font-semibold">{solPercent}%</span>
                     </div>
                     <input
                       type="range"
@@ -366,8 +366,8 @@ export default function App() {
 
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <label className="text-gray-400 text-sm font-medium">Token Amount</label>
-                      <span className="text-purple-400 text-sm font-semibold">{tokenPercent}%</span>
+                      <label className="text-gray-400 text-xs sm:text-sm font-medium">Token Amount</label>
+                      <span className="text-purple-400 text-xs sm:text-sm font-semibold">{tokenPercent}%</span>
                     </div>
                     <input
                       type="range"
@@ -388,7 +388,7 @@ export default function App() {
                     />
                   </div>
 
-                  <div className="text-xs text-gray-500 text-center font-medium">
+                    <div className="text-[10px] sm:text-xs text-gray-500 text-center font-medium">
                     Price moves based on SOL/Token ratio
                   </div>
                 </>
@@ -397,10 +397,10 @@ export default function App() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3">
             <button
               onClick={() => setIsAnimating(!isAnimating)}
-              className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all shadow-lg cursor-pointer ${
+              className={`flex-1 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-bold transition-all shadow-lg cursor-pointer ${
                 isAnimating
                   ? 'bg-red-600 hover:bg-red-700 text-white'
                   : 'bg-emerald-600 hover:bg-emerald-700 text-white'
@@ -418,25 +418,25 @@ export default function App() {
                 setSolPercent(50);
                 setTokenPercent(50);
               }}
-              className="px-6 py-3 bg-[#0f1015] hover:bg-[#15161d] text-gray-400 rounded-lg text-sm font-bold transition-all border border-gray-800 cursor-pointer"
+              className="px-4 sm:px-6 py-2.5 sm:py-3 bg-[#0f1015] hover:bg-[#15161d] text-gray-400 rounded-lg text-xs sm:text-sm font-bold transition-all border border-gray-800 cursor-pointer"
             >
               Reset
             </button>
           </div>
 
           {/* Fee Display - Dark */}
-          <div className="mt-4 pt-4 border-t border-gray-800">
+          <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-800">
             <div className="flex items-center justify-between">
-              <span className="text-gray-400 text-sm font-medium">Total Fees Earned</span>
-              <span className="text-emerald-400 text-lg font-bold">${totalFees.toFixed(2)}</span>
+              <span className="text-gray-400 text-xs sm:text-sm font-medium">Total Fees Earned</span>
+              <span className="text-emerald-400 text-base sm:text-lg font-bold">${totalFees.toFixed(2)}</span>
             </div>
           </div>
         </div>
-        <div onClick={() => window.open('https://x.com/biginthe4teen', '_blank')} className="flex flex-col items-center gap-2 cursor-pointer">
+        <div onClick={() => window.open('https://x.com/biginthe4teen', '_blank')} className="flex flex-col items-center gap-2 cursor-pointer order-3 lg:order-3">
         <div className="border-2 border-red-900 rounded-full">
-          <img src={luffy} alt="logo" className="w-25 h-25 rounded-full" />
+          <img src={luffy} alt="logo" className="w-20 h-20 sm:w-25 sm:h-25 rounded-full" />
         </div>
-        <p className="text-white text-[18px] font-bold ">@biginthe4teen</p>
+        <p className="text-white text-sm sm:text-[18px] font-bold">@biginthe4teen</p>
         </div>
 
       </div>
