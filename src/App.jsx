@@ -163,6 +163,21 @@ export default function App() {
     return () => clearTimeout(animationRef.current);
   }, [isAnimating, waveDirection, binSteps, bars]);
 
+  // Add keyboard event listener for Enter key
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        setIsAnimating(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#0a0b0f] flex items-center justify-center p-4">
       <div className="w-full  flex items-center justify-evenly gap-4">
@@ -177,13 +192,13 @@ export default function App() {
           </div>
         </div>
         {/* Dark Enterprise Card */}
-        <div className="bg-[#1a1b23] w-[500px] rounded-2xl p-6 shadow-2xl border border-gray-800"
+        <div className="bg-[#1a1b23] w-[500px] rounded-2xl p-4 shadow-2xl border border-gray-800"
           style={{ boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3)' }}>
           
             {/* Header */}
             <div className="mb-5">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-red-800 via-red-500 to-orange-900 bg-clip-text text-transparent">
-                BidAsk for GIGA DEGAN
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-red-800 via-red-800 to-orange-900 bg-clip-text text-transparent">
+                BidAsk for GIGA DEGENS
               </h1>
               <p className="text-sm text-white font-bold mt-1">This is just an example UI of how my Bid/Ask strategy works to make it easy to understand.</p>
             </div>
@@ -285,7 +300,10 @@ export default function App() {
                   max="100"
                   value={binSteps}
                   onChange={(e) => setBinSteps(parseInt(e.target.value))}
-                  className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                  className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer range-blue"
+                  style={{
+                    background: `linear-gradient(to right, #3b82f6 ${((binSteps - 10) / 90) * 100}%, #1f2937 ${((binSteps - 10) / 90) * 100}%)`
+                  }}
                   disabled={isAnimating}
                 />
               </div>
@@ -313,9 +331,7 @@ export default function App() {
                     step="500"
                     value={coinAmount}
                     onChange={(e) => setCoinAmount(parseInt(e.target.value))}
-                    className={`w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer ${
-                      mode === 'bid' ? 'accent-orange-500' : 'accent-purple-500'
-                    }`}
+                    className={`w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer`}
                     disabled={isAnimating}
                   />
                 </div>
@@ -340,7 +356,10 @@ export default function App() {
                         setSolPercent(newSol);
                         setTokenPercent(100 - newSol);
                       }}
-                      className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                      className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer range-orange"
+                      style={{
+                        background: `linear-gradient(to right, #ea580c ${solPercent}%, #1f2937 ${solPercent}%)`
+                      }}
                       disabled={isAnimating}
                     />
                   </div>
@@ -361,7 +380,10 @@ export default function App() {
                         setTokenPercent(newToken);
                         setSolPercent(100 - newToken);
                       }}
-                      className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                      className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer range-purple"
+                      style={{
+                        background: `linear-gradient(to right, #9333ea ${tokenPercent}%, #1f2937 ${tokenPercent}%)`
+                      }}
                       disabled={isAnimating}
                     />
                   </div>
