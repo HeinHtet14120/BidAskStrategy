@@ -432,7 +432,7 @@ export default function App() {
             </div>
           </div>
         </div>
-        <div onClick={() => window.open('https://x.com/biginthe4teen', '_blank')} className="flex flex-col items-center gap-2 cursor-pointer order-3 lg:order-3">
+        <div onClick={() => window.open('https://x.com/biginthe4teen/status/1989321624215318574', '_blank')} className="flex flex-col items-center gap-2 cursor-pointer order-3 lg:order-3">
         <div className="border-2 border-red-900 rounded-full">
           <img src={luffy} alt="logo" className="w-20 h-20 sm:w-25 sm:h-25 rounded-full" />
         </div>
