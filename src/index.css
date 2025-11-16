@@ -122,10 +122,28 @@
 /* CurvedLoop component styles */
 .curved-loop-jacket {
   width: 100%;
-  height: 120px;
+  height: 60px;
   overflow: hidden;
   position: relative;
   pointer-events: none;
+}
+
+@media (min-width: 640px) {
+  .curved-loop-jacket {
+    height: 80px;
+  }
+}
+
+@media (min-width: 768px) {
+  .curved-loop-jacket {
+    height: 100px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .curved-loop-jacket {
+    height: 120px;
+  }
 }
 
 .curved-loop-svg {
@@ -133,6 +151,35 @@
   height: 100%;
   display: block;
   pointer-events: none;
+}
+
+/* Responsive font size for SVG text */
+.curved-loop-svg text {
+  font-size: 4.125rem; /* text-lg - 18px for mobile */
+}
+
+@media (min-width: 640px) {
+  .curved-loop-svg text {
+    font-size: 1.5rem; /* text-xl - 20px */
+  }
+}
+
+@media (min-width: 768px) {
+  .curved-loop-svg text {
+    font-size: 2.5rem; /* text-2xl - 24px for iPad */
+  }
+}
+
+@media (min-width: 1024px) {
+  .curved-loop-svg text {
+    font-size: 3.5rem; /* text-3xl - 28px */
+  }
+}
+
+@media (min-width: 1280px) {
+  .curved-loop-svg text {
+    font-size: 2rem; /* text-4xl - 32px */
+  }
 }
 
 /* Support for Tailwind text color classes in SVG */
@@ -205,7 +252,6 @@
   width: 100%;
   height: 100%;
   position: relative;
-  pointer-events: auto;
 }
 
 .text-cursor-inner {
@@ -214,7 +260,6 @@
   left: 0;
   right: 0;
   bottom: 0;
-  pointer-events: none;
 }
 
 .text-cursor-item {
@@ -222,7 +267,6 @@
   user-select: none;
   white-space: nowrap;
   font-size: 1.875rem;
-  pointer-events: none;
   z-index: 9999;
 }
   
