@@ -20,7 +20,7 @@ const App = () => {
   // ];
 
   return (
-    <div className="min-h-screen bg-gray-100 relative">
+    <div className="h-[120vh] bg-gray-100 relative">
       <Home />
       <div className="absolute top-0 left-0 w-full">
         <CurvedLoop 
@@ -29,7 +29,7 @@ const App = () => {
           curveAmount={0}
           direction="right"
           interactive={false}
-          fill="#ffffff"
+          gradient={['#ff6b35', '#ff4757', '#c44569', '#8b5cf6', '#6c5ce7']}
           className="text-[14px] sm:text-[18px] md:text-[24px] lg:text-[28px] xl:text-[32px] font-bold w-full h-full"
         />
       </div>

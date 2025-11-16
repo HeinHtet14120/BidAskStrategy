@@ -179,7 +179,7 @@ const Home = () => {
     }, []);
   
     return (
-      <div className="absolute w-full h-full top-0 left-0 z-0 min-h-screen bg-[#0a0b0f] flex items-center justify-center p-2 sm:p-4">
+      <div className="absolute w-full h-full top-0 left-0 z-0 py-10 bg-[#0a0b0f] flex items-center justify-center p-2 sm:p-4">
         <div className="w-full flex flex-col lg:flex-row items-center justify-center lg:justify-evenly gap-4 lg:gap-4">
           <div className="flex flex-row lg:flex-col items-center justify-center gap-4 lg:gap-32 order-2 lg:order-1">
             <div onClick={() => window.open('https://x.com/MeteoraAG', '_blank')} className="flex items-center gap-2 cursor-pointer">

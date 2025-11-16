@@ -8,7 +8,8 @@ const CurvedLoop = ({
   curveAmount = 400,
   direction = 'left',
   interactive = true,
-  fill = 'white'
+  fill = 'white',
+  gradient = null // Array of gradient colors like ['#ff0000', '#00ff00', '#0000ff'] or null for solid
 }) => {
   const text = useMemo(() => {
     const hasTrailing = /\s|\u00A0$/.test(marqueeText);
@@ -23,7 +24,10 @@ const CurvedLoop = ({
   const [isDragging, setIsDragging] = useState(false);
   const uid = useId();
   const pathId = `curve-${uid}`;
+  const gradientId = `gradient-${uid}`;
   const pathD = `M-100,40 Q500,${40 + curveAmount} 1540,40`;
+  
+  const useGradient = gradient && Array.isArray(gradient) && gradient.length > 0;
 
   const dragRef = useRef(false);
   const lastXRef = useRef(0);
@@ -126,14 +130,22 @@ const CurvedLoop = ({
         </text>
         <defs>
           <path ref={pathRef} id={pathId} d={pathD} fill="none" stroke="transparent" />
+          {useGradient && (
+            <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
+              {gradient.map((color, index) => {
+                const offset = (index / (gradient.length - 1)) * 100;
+                return <stop key={index} offset={`${offset}%`} stopColor={color} />;
+              })}
+            </linearGradient>
+          )}
         </defs>
         {ready && (
           <text 
             fontWeight="bold" 
             xmlSpace="preserve" 
             className={className}
-            fill={fill}
-            style={{ fill: fill }}
+            fill={useGradient ? `url(#${gradientId})` : fill}
+            style={{ fill: useGradient ? `url(#${gradientId})` : fill }}
           >
             <textPath
               ref={textPathRef}
