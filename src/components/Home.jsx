@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { TrendingUp, TrendingDown, BarChart3, X, Target, Waves, ChevronDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, BarChart3, X, Target, Waves, ChevronDown, Copy, Check, Coffee, X as XIcon } from 'lucide-react';
+import {
+  Tooltip,
+  Button,
+} from "@heroui/react";
 import metlogo from '../assets/metlogo.png';
 import luffy from '../assets/luggy.JPG';
 import lplogo from '../assets/lplogo.png';
@@ -14,10 +18,12 @@ const Home = () => {
     const [totalFees, setTotalFees] = useState(0);
     const [solPercent, setSolPercent] = useState(50); // SOL percentage for 'both' mode
     const [tokenPercent, setTokenPercent] = useState(50); // Token percentage for 'both' mode
+    const [copiedSol, setCopiedSol] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     
     const animationRef = useRef(null);
     const dropdownRef = useRef(null);
+    const bounceStateRef = useRef({ phase: 0, goingOut: true, randomRanges: [] }); // For agents mode bouncing with random ranges
 
     // Get heading based on strategy mode
     const getStrategyHeading = () => {
@@ -36,7 +42,7 @@ const Home = () => {
           return 'CURVE 4 Dummies';
       }
     };
-  
+
     const generateBars = useCallback(() => {
       return Array.from({ length: binSteps }, (_, index) => {
         let height;
@@ -75,18 +81,20 @@ const Home = () => {
             break;
           case 'agents':
             // Curved strategy: Pyramid shape - lowest at both ends, highest in middle
-            // Creates a curved liquidity distribution across bins
+            // Center point shifts based on SOL/Token ratio (like bid/ask)
+            // More SOL = center shifts right (more buying power, higher price)
+            // More Token = center shifts left (more supply, lower price)
             // eslint-disable-next-line no-case-declarations
-            const agentsCenter = binSteps / 2;
+            const agentsDynamicCenter = (solPercent / 100) * binSteps;
             // eslint-disable-next-line no-case-declarations
-            const agentsDistanceFromCenter = Math.abs(index - agentsCenter);
+            const agentsDistanceFromCenter = Math.abs(index - agentsDynamicCenter);
             // eslint-disable-next-line no-case-declarations
-            const agentsMaxDistance = agentsCenter;
-            // Pyramid: highest at center (100%), lowest at edges (0%)
+            const agentsMaxDistance = Math.max(agentsDynamicCenter, binSteps - agentsDynamicCenter);
+            // Pyramid: highest at dynamic center (100%), lowest at edges (0%)
             // Adjust curve intensity based on SOL/Token ratio
             // eslint-disable-next-line no-case-declarations
             const agentsCurveIntensity = 0.5 + (solPercent / 100) * 0.5; // 0.5 to 1.0
-            // Inverted: closer to center = higher, farther = lower
+            // Inverted: closer to dynamic center = higher, farther = lower
             // eslint-disable-next-line no-case-declarations
             const agentsNormalizedHeight = 1 - (agentsDistanceFromCenter / agentsMaxDistance);
             height = agentsNormalizedHeight * 100 * agentsCurveIntensity;
@@ -126,9 +134,11 @@ const Home = () => {
           setCurrentWave(spotCenter);
           setWaveDirection('forward'); // Move right first
         } else if (mode === 'agents') {
-          // Start from left for agents mode (curved strategy) - same as spots
-          setCurrentWave(0); // Start from left
+          // Start from dynamic center based on SOL percentage (like both mode)
+          const agentsDynamicCenter = Math.floor((solPercent / 100) * binSteps);
+          setCurrentWave(agentsDynamicCenter); // Start from dynamic center
           setWaveDirection('forward'); // Move right first
+          bounceStateRef.current = { phase: 0, goingOut: true, randomRanges: [] }; // Reset bounce state
         } else {
           setCurrentWave(0); // Start from left for ask/combined
           setWaveDirection('forward'); // Move right first
@@ -137,7 +147,7 @@ const Home = () => {
     }, [mode, binSteps, isAnimating, solPercent, tokenPercent]);
   
     const getBarColor = (index) => {
-      const dynamicCenter = mode === 'both' ? (solPercent / 100) * binSteps : binSteps / 2;
+      const dynamicCenter = (mode === 'both' || mode === 'agents') ? (solPercent / 100) * binSteps : binSteps / 2;
       
       if (!isAnimating) {
         switch(mode) {
@@ -150,11 +160,13 @@ const Home = () => {
             // All bars are blue for spots mode
             return '#4EABD0';
           case 'agents':
-            // Curved strategy: Gradient from orange to purple (bid to ask)
+            // Curved strategy: Gradient from orange (left/bid) to purple (right/ask)
+            // Based on position relative to dynamic center (like both mode)
             // eslint-disable-next-line no-case-declarations
-            const agentProgress = index / binSteps;
+            const agentProgress = index / binSteps; // 0 to 1 across all bins
+            // Orange (#F97316 = rgb(249, 115, 22)) to Purple (#A855F7 = rgb(168, 85, 247))
             // eslint-disable-next-line no-case-declarations
-            const r = Math.floor(249 + (168 - 249) * agentProgress); // Orange to Purple
+            const r = Math.floor(249 + (168 - 249) * agentProgress);
             // eslint-disable-next-line no-case-declarations
             const g = Math.floor(115 + (85 - 115) * agentProgress);
             // eslint-disable-next-line no-case-declarations
@@ -185,8 +197,17 @@ const Home = () => {
         // Spots mode: purple animation going left to right
         if (index < currentWave) return '#563AC9';
       } else if (mode === 'agents') {
-        // Agents mode: paint blue as wave passes left to right (same as spots)
-        if (index < currentWave) return '#4267B2';
+        // Agents mode: blue spreads from center outward
+        // The blue color radiates from the center point as the wave moves
+        const center = Math.floor((solPercent / 100) * binSteps);
+        // Blue spreads from center - paint bins that are between center and current wave position
+        const isBetweenCenterAndWave = 
+          (currentWave >= center && index >= center && index <= currentWave) ||
+          (currentWave <= center && index <= center && index >= currentWave);
+        
+        if (isBetweenCenterAndWave) {
+          return '#4267B2';
+        }
       } else {
         // Ask/Combined: starts from left, paints right to left  
         // Bins on the LEFT are painted/unpainted based on currentWave position
@@ -203,9 +224,11 @@ const Home = () => {
           // All bars are blue for spots mode
           return '#4EABD0';
         case 'agents':
-          // Curved strategy: Gradient from orange to purple
+          // Curved strategy: Gradient from orange (left/bid) to purple (right/ask)
+          // Based on position relative to dynamic center (like both mode)
           // eslint-disable-next-line no-case-declarations
-          const agentProgressDefault = index / binSteps;
+          const agentProgressDefault = index / binSteps; // 0 to 1 across all bins
+          // Orange (#F97316 = rgb(249, 115, 22)) to Purple (#A855F7 = rgb(168, 85, 247))
           // eslint-disable-next-line no-case-declarations
           const rDefault = Math.floor(249 + (168 - 249) * agentProgressDefault);
           // eslint-disable-next-line no-case-declarations
@@ -222,6 +245,95 @@ const Home = () => {
   
       const animate = () => {
         setCurrentWave(prev => {
+          // Special bouncing animation for agents mode with random slot-like percentages
+          if (mode === 'agents') {
+            const center = Math.floor((solPercent / 100) * binSteps);
+            const maxRight = binSteps - 1;
+            const maxLeft = 0;
+            const maxRightDistance = maxRight - center;
+            const maxLeftDistance = center - maxLeft;
+            
+            // Get current bounce state
+            let { phase, goingOut, randomRanges } = bounceStateRef.current;
+            
+            // Generate random ranges like a slot machine when we need new ones
+            if (randomRanges.length === 0 || phase >= randomRanges.length) {
+              // Generate random percentages (10% to 80% range for variety)
+              const randomRightPercent = 0.1 + Math.random() * 0.7; // 10% to 80%
+              const randomLeftPercent = 0.1 + Math.random() * 0.7; // 10% to 80%
+              
+              // Alternate between right and left, creating random patterns
+              randomRanges = [
+                { direction: 'right', range: Math.floor(maxRightDistance * randomRightPercent) },
+                { direction: 'left', range: Math.floor(maxLeftDistance * randomLeftPercent) },
+                { direction: 'right', range: Math.floor(maxRightDistance * (0.1 + Math.random() * 0.7)) },
+                { direction: 'left', range: Math.floor(maxLeftDistance * (0.1 + Math.random() * 0.7)) },
+                { direction: 'right', range: Math.floor(maxRightDistance * (0.1 + Math.random() * 0.7)) }
+              ];
+              bounceStateRef.current.randomRanges = randomRanges;
+            }
+            
+            const pattern = randomRanges[phase % randomRanges.length];
+            const target = pattern.direction === 'right' 
+              ? Math.min(center + pattern.range, maxRight)
+              : Math.max(center - pattern.range, maxLeft);
+            
+            let next = prev;
+            let newGoingOut = goingOut;
+            let newPhase = phase;
+            
+            if (goingOut) {
+              // Moving away from center
+              if (pattern.direction === 'right') {
+                next = Math.min(prev + 1, target);
+                if (next >= target) {
+                  newGoingOut = false; // Start coming back
+                }
+              } else {
+                next = Math.max(prev - 1, target);
+                if (next <= target) {
+                  newGoingOut = false; // Start coming back
+                }
+              }
+            } else {
+              // Coming back to center
+              if (prev > center) {
+                next = Math.max(prev - 1, center);
+              } else if (prev < center) {
+                next = Math.min(prev + 1, center);
+              } else {
+                // Reached center, move to next phase with new random range
+                newPhase = phase + 1;
+                // Generate new random range for this phase if needed
+                if (newPhase >= randomRanges.length) {
+                  const randomPercent = 0.1 + Math.random() * 0.7;
+                  const direction = newPhase % 2 === 0 ? 'right' : 'left';
+                  const range = direction === 'right' 
+                    ? Math.floor(maxRightDistance * randomPercent)
+                    : Math.floor(maxLeftDistance * randomPercent);
+                  randomRanges.push({ direction, range });
+                  bounceStateRef.current.randomRanges = randomRanges;
+                }
+                newGoingOut = true;
+                // Start moving in the new direction
+                const nextPattern = randomRanges[newPhase % randomRanges.length];
+                if (nextPattern.direction === 'right') {
+                  next = center + 1;
+                } else {
+                  next = center - 1;
+                }
+              }
+            }
+            
+            // Update bounce state
+            bounceStateRef.current = { phase: newPhase, goingOut: newGoingOut, randomRanges };
+            
+            const fee = bars[next].liquidity * 0.003;
+            setTotalFees(total => total + fee);
+            return next;
+          }
+          
+          // Original animation for other modes
           let next;
           if (waveDirection === 'forward') {
             next = prev + 1;
@@ -246,7 +358,7 @@ const Home = () => {
   
       animationRef.current = setTimeout(animate, 150);  
       return () => clearTimeout(animationRef.current);
-    }, [isAnimating, waveDirection, binSteps, bars]);
+    }, [isAnimating, waveDirection, binSteps, bars, mode, solPercent]);
   
     // Add keyboard event listener for Enter key
     useEffect(() => {
@@ -279,6 +391,17 @@ const Home = () => {
         document.removeEventListener('mousedown', handleClickOutside);
       };
     }, [isDropdownOpen]);
+
+    // Copy Solana address and update tooltip
+    const handleCopySol = async () => {
+      try {
+        await navigator.clipboard.writeText('2scUApKr4Q6A8YoXdsAnHGNjFxGPvsZKvMWadkphKzR7');
+        setCopiedSol(true);
+        setTimeout(() => setCopiedSol(false), 2000);
+      } catch (err) {
+        console.error('Failed to copy:', err);
+      }
+    };
   
     return (
       <div className="absolute w-full h-full top-0 left-0 z-0 py-10 bg-[#0a0b0f] flex items-center justify-center p-2 sm:p-4">
@@ -618,7 +741,7 @@ const Home = () => {
                 }`}
                 style={{ boxShadow: '0 4px 12px -2px rgba(0, 0, 0, 0.5)' }}
               >
-                {isAnimating ? 'Stop' : 'Start'}
+                {isAnimating ? 'Pause' : 'Start'}
               </button>
               <button
                 onClick={() => {
@@ -643,12 +766,84 @@ const Home = () => {
                 <span className="text-emerald-400 text-base sm:text-lg font-bold">${totalFees.toFixed(2)}</span>
               </div>
             </div>
+
           </div>
-          <div onClick={() => window.open('https://x.com/biginthe4teen/status/1989321624215318574', '_blank')} className="flex flex-col items-center gap-2 cursor-pointer order-3 lg:order-3">
-          <div className="border-2 border-red-900 rounded-full">
-            <img src={luffy} alt="logo" className="w-20 h-20 sm:w-25 sm:h-25 rounded-full" />
-          </div>
-          <p className="text-white text-sm sm:text-[18px] font-bold">@biginthe4teen</p>
+          <div className="flex flex-col items-center gap-2 order-3 lg:order-3 relative">
+            <div 
+              onClick={() => window.open('https://x.com/biginthe4teen/status/1989321624215318574', '_blank')}
+              className="flex flex-col items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+            >
+              <div className="border-2 border-red-900 rounded-full">
+                <img src={luffy} alt="logo" className="w-20 h-20 sm:w-25 sm:h-25 rounded-full" />
+              </div>
+              <p className="text-white text-sm sm:text-[18px] font-bold">@biginthe4teen</p>
+            </div>
+            
+            <Tooltip
+              closeDelay={0}
+              content={
+                copiedSol ? (
+                  <span className="flex items-center gap-2">
+                    <Check className="w-4 h-4" />
+                    <span>Copied!</span>
+                  </span>
+                ) : (
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.6))' }}>
+                    <circle cx="12" cy="12" r="12" fill="url(#solBgGradient)" />
+                    <defs>
+                      <linearGradient id="solBgGradient" x1="12" y1="0" x2="12" y2="24">
+                        <stop offset="0%" stopColor="#1a0b2e" />
+                        <stop offset="100%" stopColor="#2d1b4e" />
+                      </linearGradient>
+                      <linearGradient id="solBottomBar" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#FF00FF" />
+                        <stop offset="100%" stopColor="#9945FF" />
+                      </linearGradient>
+                    </defs>
+                    {/* Top bar - teal */}
+                    <path d="M6 9L18 9L17.5 10.5L5.5 10.5L6 9Z" fill="#14F195" />
+                    {/* Middle bar - teal */}
+                    <path d="M6 11.5L18 11.5L17.5 13L5.5 13L6 11.5Z" fill="#14F195" />
+                    {/* Bottom bar - gradient magenta to purple */}
+                    <path d="M6 14L18 14L17.5 15.5L5.5 15.5L6 14Z" fill="url(#solBottomBar)" />
+                  </svg>
+                )
+              }
+              delay={0}
+              placement="bottom"
+              classNames={{
+                base: "bg-transparent",
+                content: "bg-transparent p-2",
+              }}
+              motionProps={{
+                variants: {
+                  exit: {
+                    opacity: 0,
+                    transition: {
+                      duration: 0.1,
+                      ease: "easeIn",
+                    },
+                  },
+                  enter: {
+                    opacity: 1,
+                    transition: {
+                      duration: 0.15,
+                      ease: "easeOut",
+                    },
+                  },
+                },
+              }}
+            >
+              <Button 
+                disableRipple 
+                variant="light"
+                isIconOnly
+                onClick={handleCopySol}
+                className="mt-2 flex items-center justify-center p-3 bg-transparent hover:bg-[#15161d]/50 text-white rounded-lg transition-all duration-200 hover:scale-105 active:scale-95"
+              >
+                <Coffee className="w-5 h-5 text-[#ff4757]" />
+              </Button>
+            </Tooltip>
           </div>
   
         </div>
