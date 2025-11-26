@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { TrendingUp, TrendingDown, BarChart3, X } from 'lucide-react';
+import { TrendingUp, TrendingDown, BarChart3, X, Target, Waves, ChevronDown } from 'lucide-react';
 import metlogo from '../assets/metlogo.png';
 import luffy from '../assets/luggy.JPG';
 import lplogo from '../assets/lplogo.png';
@@ -14,8 +14,28 @@ const Home = () => {
     const [totalFees, setTotalFees] = useState(0);
     const [solPercent, setSolPercent] = useState(50); // SOL percentage for 'both' mode
     const [tokenPercent, setTokenPercent] = useState(50); // Token percentage for 'both' mode
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     
     const animationRef = useRef(null);
+    const dropdownRef = useRef(null);
+
+    // Get heading based on strategy mode
+    const getStrategyHeading = () => {
+      switch(mode) {
+        case 'bid':
+          return 'BID Strategy';
+        case 'ask':
+          return 'ASK Strategy';
+        case 'both':
+          return 'BID ASK Strategy';
+        case 'spots':
+          return 'SPOTS Strategy';
+        case 'agents':
+          return 'CURVE 4 Dummies';
+        default:
+          return 'CURVE 4 Dummies';
+      }
+    };
   
     const generateBars = useCallback(() => {
       return Array.from({ length: binSteps }, (_, index) => {
@@ -49,6 +69,28 @@ const Home = () => {
             // V-shape: starts at 0 at dynamic center, increases to 100 on both sides
             height = (distanceFromDynamicCenter / maxDistance) * 100;
             break;
+          case 'spots':
+            // Straight/flat bars - all same height
+            height = 70;
+            break;
+          case 'agents':
+            // Curved strategy: Pyramid shape - lowest at both ends, highest in middle
+            // Creates a curved liquidity distribution across bins
+            // eslint-disable-next-line no-case-declarations
+            const agentsCenter = binSteps / 2;
+            // eslint-disable-next-line no-case-declarations
+            const agentsDistanceFromCenter = Math.abs(index - agentsCenter);
+            // eslint-disable-next-line no-case-declarations
+            const agentsMaxDistance = agentsCenter;
+            // Pyramid: highest at center (100%), lowest at edges (0%)
+            // Adjust curve intensity based on SOL/Token ratio
+            // eslint-disable-next-line no-case-declarations
+            const agentsCurveIntensity = 0.5 + (solPercent / 100) * 0.5; // 0.5 to 1.0
+            // Inverted: closer to center = higher, farther = lower
+            // eslint-disable-next-line no-case-declarations
+            const agentsNormalizedHeight = 1 - (agentsDistanceFromCenter / agentsMaxDistance);
+            height = agentsNormalizedHeight * 100 * agentsCurveIntensity;
+            break;
           default:
             height = 60;
         }
@@ -78,12 +120,21 @@ const Home = () => {
           const dynamicCenter = Math.floor((solPercent / 100) * binSteps);
           setCurrentWave(dynamicCenter); // Start from dynamic center for both
           setWaveDirection('forward'); // Move right first
+        } else if (mode === 'spots') {
+          // Start from spot center based on SOL percentage
+          const spotCenter = Math.floor((solPercent / 100) * binSteps);
+          setCurrentWave(spotCenter);
+          setWaveDirection('forward'); // Move right first
+        } else if (mode === 'agents') {
+          // Start from left for agents mode (curved strategy) - same as spots
+          setCurrentWave(0); // Start from left
+          setWaveDirection('forward'); // Move right first
         } else {
           setCurrentWave(0); // Start from left for ask/combined
           setWaveDirection('forward'); // Move right first
         }
       }
-    }, [mode, binSteps, isAnimating, solPercent]);
+    }, [mode, binSteps, isAnimating, solPercent, tokenPercent]);
   
     const getBarColor = (index) => {
       const dynamicCenter = mode === 'both' ? (solPercent / 100) * binSteps : binSteps / 2;
@@ -95,6 +146,20 @@ const Home = () => {
           case 'both':
             // Left side (Bid - SOL to buy token) = Orange, Right side (Ask - Token to sell) = Purple
             return index < dynamicCenter ? '#F97316' : '#A855F7';
+          case 'spots':
+            // All bars are blue for spots mode
+            return '#4EABD0';
+          case 'agents':
+            // Curved strategy: Gradient from orange to purple (bid to ask)
+            // eslint-disable-next-line no-case-declarations
+            const agentProgress = index / binSteps;
+            // eslint-disable-next-line no-case-declarations
+            const r = Math.floor(249 + (168 - 249) * agentProgress); // Orange to Purple
+            // eslint-disable-next-line no-case-declarations
+            const g = Math.floor(115 + (85 - 115) * agentProgress);
+            // eslint-disable-next-line no-case-declarations
+            const b = Math.floor(22 + (247 - 22) * agentProgress);
+            return `rgb(${r}, ${g}, ${b})`;
           default: return '#8B5CF6';
         }
       }
@@ -116,6 +181,12 @@ const Home = () => {
           // Right side (Ask): paint blue as wave passes
           if (index >= dynamicCenter && index <= currentWave) return '#4267B2';
         }
+      } else if (mode === 'spots') {
+        // Spots mode: purple animation going left to right
+        if (index < currentWave) return '#563AC9';
+      } else if (mode === 'agents') {
+        // Agents mode: paint blue as wave passes left to right (same as spots)
+        if (index < currentWave) return '#4267B2';
       } else {
         // Ask/Combined: starts from left, paints right to left  
         // Bins on the LEFT are painted/unpainted based on currentWave position
@@ -128,6 +199,20 @@ const Home = () => {
         case 'ask': return '#A855F7';
         case 'both':
           return index < dynamicCenter ? '#F97316' : '#A855F7';
+        case 'spots':
+          // All bars are blue for spots mode
+          return '#4EABD0';
+        case 'agents':
+          // Curved strategy: Gradient from orange to purple
+          // eslint-disable-next-line no-case-declarations
+          const agentProgressDefault = index / binSteps;
+          // eslint-disable-next-line no-case-declarations
+          const rDefault = Math.floor(249 + (168 - 249) * agentProgressDefault);
+          // eslint-disable-next-line no-case-declarations
+          const gDefault = Math.floor(115 + (85 - 115) * agentProgressDefault);
+          // eslint-disable-next-line no-case-declarations
+          const bDefault = Math.floor(22 + (247 - 22) * agentProgressDefault);
+          return `rgb(${rDefault}, ${gDefault}, ${bDefault})`;
         default: return '#8B5CF6';
       }
     };
@@ -177,6 +262,23 @@ const Home = () => {
         window.removeEventListener('keydown', handleKeyPress);
       };
     }, []);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+      const handleClickOutside = (event) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+          setIsDropdownOpen(false);
+        }
+      };
+
+      if (isDropdownOpen) {
+        document.addEventListener('mousedown', handleClickOutside);
+      }
+
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }, [isDropdownOpen]);
   
     return (
       <div className="absolute w-full h-full top-0 left-0 z-0 py-10 bg-[#0a0b0f] flex items-center justify-center p-2 sm:p-4">
@@ -192,15 +294,15 @@ const Home = () => {
             </div>
           </div>
           {/* Dark Enterprise Card */}
-          <div className="bg-[#1a1b23] w-full max-w-[500px] rounded-2xl p-3 sm:p-4 shadow-2xl border border-gray-800 order-1 lg:order-2"
-            style={{ boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3)' }}>
+          <div className="bg-[#1a1b23] w-full max-w-[500px] rounded-2xl p-3 sm:p-4 border border-gray-800 order-1 lg:order-2"
+            style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 0, 0, 0.1)' }}>
             
               {/* Header */}
               <div className="mb-4 sm:mb-5">
-                <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-red-800 via-red-800 to-orange-900 bg-clip-text text-transparent">
-                  BidAsk for GIGA DEGENS
+                <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#ff4757] via-[#c44569] to-[#8b5cf6] bg-clip-text text-transparent">
+                {getStrategyHeading()}
                 </h1>
-                <p className="text-xs sm:text-sm text-white font-bold mt-1">This is just an example UI of how my Bid/Ask strategy works to make it easy to understand.</p>
+                {/* <p className="text-xs sm:text-sm text-white font-bold mt-1">This is just an example UI of how my Bid/Ask strategy works to make it easy to understand.</p> */}
               </div>
   
             {/* Chart - Dark */}
@@ -247,42 +349,135 @@ const Home = () => {
               </div>
             </div>
   
-            {/* Buttons - Dark style */}
-            <div className="flex justify-center gap-2 mb-4 sm:mb-5">
-              {mode === 'combined' ? (
-                <button
-                  onClick={() => setMode('both')}
-                  className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-purple-600 to-orange-600 hover:from-purple-700 hover:to-orange-700 text-white rounded-lg text-xs sm:text-sm font-semibold transition-all shadow-lg"
-                >
-                  <BarChart3 className="w-4 h-4" />
-                  <TrendingUp className="w-4 h-4" />
-                  <span>Bid Ask</span>
-                </button>
-              ) : (
-                <>
+            {/* Dropdown Button */}
+            <div className="flex justify-center mb-4 sm:mb-5 relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className={`flex items-center justify-center gap-2 px-5 sm:px-7 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95 ${
+                  mode === 'combined'
+                    ? 'bg-gradient-to-r from-purple-600 to-orange-600 text-white'
+                    : mode === 'bid'
+                    ? 'bg-orange-600 text-white'
+                    : mode === 'ask'
+                    ? 'bg-purple-600 text-white'
+                    : mode === 'spots'
+                    ? 'bg-emerald-600 text-white'
+                    : mode === 'agents'
+                    ? 'bg-gradient-to-r from-orange-600 to-purple-600 text-white'
+                    : 'bg-[#0f1015] text-gray-400 border border-gray-800'
+                }`}
+                style={{
+                  boxShadow: isDropdownOpen 
+                    ? '0 10px 25px -5px rgba(0, 0, 0, 0.6)' 
+                    : '0 4px 12px -2px rgba(0, 0, 0, 0.5)'
+                }}
+              >
+                {mode === 'combined' ? (
+                  <>
+                    <BarChart3 className="w-4 h-4" />
+                    <TrendingUp className="w-4 h-4" />
+                    <span>Bid Ask</span>
+                  </>
+                ) : mode === 'bid' ? (
+                  <>
+                    <TrendingDown className="w-4 h-4" />
+                    <span>Bid</span>
+                  </>
+                ) : mode === 'ask' ? (
+                  <>
+                    <TrendingUp className="w-4 h-4" />
+                    <span>Ask</span>
+                  </>
+                ) : mode === 'spots' ? (
+                  <>
+                    <Target className="w-4 h-4" />
+                    <span>Spots</span>
+                  </>
+                ) : mode === 'agents' ? (
+                  <>
+                    <Waves className="w-4 h-4" />
+                    <span>Curved</span>
+                  </>
+                ) : null}
+                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Dropdown Menu */}
+              {isDropdownOpen && (
+                <div className="absolute top-full mt-2 w-full min-w-[200px] bg-[#1a1b23] border border-gray-800 rounded-xl overflow-hidden z-50"
+                  style={{ boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.8)' }}>
                   <button
-                    onClick={() => setMode('bid')}
-                    className={`flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                    onClick={() => {
+                      setMode('both');
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-2 px-4 py-3 text-left text-xs sm:text-sm font-semibold transition-all duration-200 ${
+                      mode === 'combined' || mode === 'both'
+                        ? 'bg-gradient-to-r from-purple-600/20 to-orange-600/20 text-white'
+                        : 'text-gray-400 hover:bg-[#15161d] hover:text-white'
+                    }`}
+                  >
+                    <BarChart3 className="w-4 h-4" />
+                    <TrendingUp className="w-4 h-4" />
+                    <span>Bid Ask</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMode('bid');
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-2 px-4 py-3 text-left text-xs sm:text-sm font-semibold transition-all duration-200 ${
                       mode === 'bid'
-                        ? 'bg-orange-600 text-white shadow-lg'
-                        : 'bg-[#0f1015] text-gray-400 hover:bg-[#15161d] border border-gray-800'
+                        ? 'bg-orange-600/20 text-orange-400'
+                        : 'text-gray-400 hover:bg-[#15161d] hover:text-white'
                     }`}
                   >
                     <TrendingDown className="w-4 h-4" />
                     <span>Bid</span>
                   </button>
                   <button
-                    onClick={() => setMode('ask')}
-                    className={`flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                    onClick={() => {
+                      setMode('ask');
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-2 px-4 py-3 text-left text-xs sm:text-sm font-semibold transition-all duration-200 ${
                       mode === 'ask'
-                        ? 'bg-purple-600 text-white shadow-lg'
-                        : 'bg-[#0f1015] text-gray-400 hover:bg-[#15161d] border border-gray-800'
+                        ? 'bg-purple-600/20 text-purple-400'
+                        : 'text-gray-400 hover:bg-[#15161d] hover:text-white'
                     }`}
                   >
                     <TrendingUp className="w-4 h-4" />
                     <span>Ask</span>
                   </button>
-                </>
+                  <button
+                    onClick={() => {
+                      setMode('spots');
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-2 px-4 py-3 text-left text-xs sm:text-sm font-semibold transition-all duration-200 ${
+                      mode === 'spots'
+                        ? 'bg-emerald-600/20 text-emerald-400'
+                        : 'text-gray-400 hover:bg-[#15161d] hover:text-white'
+                    }`}
+                  >
+                    <Target className="w-4 h-4" />
+                    <span>Spots</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMode('agents');
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-2 px-4 py-3 text-left text-xs sm:text-sm font-semibold transition-all duration-200 ${
+                      mode === 'agents'
+                        ? 'bg-gradient-to-r from-orange-600/20 to-purple-600/20 text-white'
+                        : 'text-gray-400 hover:bg-[#15161d] hover:text-white'
+                    }`}
+                  >
+                    <Waves className="w-4 h-4" />
+                    <span>Curved</span>
+                  </button>
+                </div>
               )}
             </div>
   
@@ -300,16 +495,18 @@ const Home = () => {
                     max="100"
                     value={binSteps}
                     onChange={(e) => setBinSteps(parseInt(e.target.value))}
-                    className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer range-blue"
+                    className="w-full"
                     style={{
-                      background: `linear-gradient(to right, #3b82f6 ${((binSteps - 10) / 90) * 100}%, #1f2937 ${((binSteps - 10) / 90) * 100}%)`
+                      background: `linear-gradient(to right, #8b5cf6 ${((binSteps - 10) / 90) * 100}%, #1f2937 ${((binSteps - 10) / 90) * 100}%)`,
+                      borderRadius: '4px',
+                      height: '8px'
                     }}
                     disabled={isAnimating}
                   />
                 </div>
   
-                {/* Coin Amount - Hide for 'both' mode, show SOL for 'bid', Token % for 'ask', dollar for others */}
-                {mode !== 'both' && (
+                {/* Coin Amount - Hide for 'both', 'spots', and 'agents' mode, show SOL for 'bid', Token % for 'ask', dollar for others */}
+                {mode !== 'both' && mode !== 'spots' && mode !== 'agents' && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-gray-400 text-xs sm:text-sm font-medium">
@@ -331,19 +528,24 @@ const Home = () => {
                       step="500"
                       value={coinAmount}
                       onChange={(e) => setCoinAmount(parseInt(e.target.value))}
-                      className={`w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer`}
+                      className="w-full"
+                      style={{
+                        background: `linear-gradient(to right, #c44569 ${((coinAmount - 1000) / 19000) * 100}%, #1f2937 ${((coinAmount - 1000) / 19000) * 100}%)`,
+                        borderRadius: '4px',
+                        height: '8px'
+                      }}
                       disabled={isAnimating}
                     />
                   </div>
                 )}
   
-                {/* Show SOL/Token controls only in 'both' mode */}
-                {mode === 'both' && (
+                {/* Show SOL/Token controls for 'both', 'spots', and 'agents' mode */}
+                {(mode === 'both' || mode === 'spots' || mode === 'agents') && (
                   <>
                     <div className="pt-2 border-t border-gray-800">
                       <div className="flex items-center justify-between mb-2">
                         <label className="text-gray-400 text-xs sm:text-sm font-medium">SOL Amount</label>
-                        <span className="text-orange-400 text-xs sm:text-sm font-semibold">{solPercent}%</span>
+                        <span className="text-xs sm:text-sm font-semibold" style={{ color: '#ff4757' }}>{solPercent}%</span>
                       </div>
                       <input
                         type="range"
@@ -356,9 +558,11 @@ const Home = () => {
                           setSolPercent(newSol);
                           setTokenPercent(100 - newSol);
                         }}
-                        className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer range-orange"
+                        className="w-full"
                         style={{
-                          background: `linear-gradient(to right, #ea580c ${solPercent}%, #1f2937 ${solPercent}%)`
+                          background: `linear-gradient(to right, #ff4757 ${solPercent}%, #1f2937 ${solPercent}%)`,
+                          borderRadius: '4px',
+                          height: '8px'
                         }}
                         disabled={isAnimating}
                       />
@@ -367,7 +571,7 @@ const Home = () => {
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <label className="text-gray-400 text-xs sm:text-sm font-medium">Token Amount</label>
-                        <span className="text-purple-400 text-xs sm:text-sm font-semibold">{tokenPercent}%</span>
+                        <span className="text-xs sm:text-sm font-semibold" style={{ color: '#8b5cf6' }}>{tokenPercent}%</span>
                       </div>
                       <input
                         type="range"
@@ -380,16 +584,23 @@ const Home = () => {
                           setTokenPercent(newToken);
                           setSolPercent(100 - newToken);
                         }}
-                        className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer range-purple"
+                        className="w-full"
                         style={{
-                          background: `linear-gradient(to right, #9333ea ${tokenPercent}%, #1f2937 ${tokenPercent}%)`
+                          background: `linear-gradient(to right, #8b5cf6 ${tokenPercent}%, #1f2937 ${tokenPercent}%)`,
+                          borderRadius: '4px',
+                          height: '8px'
                         }}
                         disabled={isAnimating}
                       />
                     </div>
   
                       <div className="text-[10px] sm:text-xs text-gray-500 text-center font-medium">
-                      Price moves based on SOL/Token ratio
+                      {mode === 'spots' 
+                        ? 'Spot positions move based on SOL/Token ratio'
+                        : mode === 'agents'
+                        ? 'Curve intensity adjusts based on SOL/Token ratio'
+                        : 'Price moves based on SOL/Token ratio'
+                      }
                     </div>
                   </>
                 )}
@@ -400,11 +611,12 @@ const Home = () => {
             <div className="flex gap-2 sm:gap-3">
               <button
                 onClick={() => setIsAnimating(!isAnimating)}
-                className={`flex-1 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-bold transition-all shadow-lg cursor-pointer ${
+                className={`flex-1 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                   isAnimating
                     ? 'bg-red-600 hover:bg-red-700 text-white'
                     : 'bg-emerald-600 hover:bg-emerald-700 text-white'
                 }`}
+                style={{ boxShadow: '0 4px 12px -2px rgba(0, 0, 0, 0.5)' }}
               >
                 {isAnimating ? 'Stop' : 'Start'}
               </button>
