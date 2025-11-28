@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { TrendingUp, TrendingDown, BarChart3, X, Target, Waves, ChevronDown, Copy, Check, Coffee, X as XIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { TrendingUp, TrendingDown, BarChart3, X, Target, Waves, ChevronDown, Copy, Check, Coffee, X as XIcon, Info } from 'lucide-react';
 import {
   Tooltip,
   Button,
@@ -9,7 +10,7 @@ import luffy from '../assets/luggy.JPG';
 import lplogo from '../assets/lplogo.png';
 
 const Home = () => {
-    const [mode, setMode] = useState('combined');
+    const [mode, setMode] = useState(null);
     const [binSteps, setBinSteps] = useState(20);
     const [coinAmount, setCoinAmount] = useState(5000);
     const [isAnimating, setIsAnimating] = useState(false);
@@ -27,6 +28,9 @@ const Home = () => {
 
     // Get heading based on strategy mode
     const getStrategyHeading = () => {
+      if (!mode) {
+        return 'Welcome LPs';
+      }
       switch(mode) {
         case 'bid':
           return 'BID Strategy';
@@ -39,7 +43,7 @@ const Home = () => {
         case 'agents':
           return 'CURVE 4 Dummies';
         default:
-          return 'CURVE 4 Dummies';
+          return 'Welcome LPs';
       }
     };
 
@@ -48,7 +52,10 @@ const Home = () => {
         let height;
         const progress = index / binSteps;
         
-        switch(mode) {
+        if (!mode) {
+          // Default empty state - show flat bars at low height
+          height = 20;
+        } else switch(mode) {
           case 'combined':
             // eslint-disable-next-line no-case-declarations
             const midPoint = binSteps / 2;
@@ -422,9 +429,20 @@ const Home = () => {
             
               {/* Header */}
               <div className="mb-4 sm:mb-5">
-                <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#ff4757] via-[#c44569] to-[#8b5cf6] bg-clip-text text-transparent">
-                {getStrategyHeading()}
-                </h1>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-2xl sm:text-4xl bg-gradient-to-r from-[#ff4757] via-[#c44569] to-[#8b5cf6] bg-clip-text text-transparent font-bold" style={{ fontFamily: "'Space Grotesk', 'Inter', 'Poppins', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>
+                    {getStrategyHeading()}
+                  </h1>
+                  {mode === 'agents' && (
+                    <Link 
+                      to="/curve" 
+                      className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-[#ff4757]/20 via-[#c44569]/20 to-[#8b5cf6]/20 border border-[#8b5cf6]/30 hover:border-[#8b5cf6]/50 transition-all duration-200 hover:scale-110 active:scale-95 group"
+                      title="Learn more about Curve strategy"
+                    >
+                      <Info className="w-4 h-4 sm:w-5 sm:h-5 text-[#8b5cf6] group-hover:text-[#ff4757] transition-colors duration-200" />
+                    </Link>
+                  )}
+                </div>
                 {/* <p className="text-xs sm:text-sm text-white font-bold mt-1">This is just an example UI of how my Bid/Ask strategy works to make it easy to understand.</p> */}
               </div>
   
@@ -477,7 +495,9 @@ const Home = () => {
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className={`flex items-center justify-center gap-2 px-5 sm:px-7 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95 ${
-                  mode === 'combined'
+                  !mode
+                    ? 'bg-[#0f1015] text-gray-400 border border-gray-800'
+                    : mode === 'combined'
                     ? 'bg-gradient-to-r from-purple-600 to-orange-600 text-white'
                     : mode === 'bid'
                     ? 'bg-orange-600 text-white'
@@ -495,7 +515,12 @@ const Home = () => {
                     : '0 4px 12px -2px rgba(0, 0, 0, 0.5)'
                 }}
               >
-                {mode === 'combined' ? (
+                {mode === null ? (
+                  <>
+                    <BarChart3 className="w-4 h-4" />
+                    <span>Choose Strategy</span>
+                  </>
+                ) : mode === 'combined' ? (
                   <>
                     <BarChart3 className="w-4 h-4" />
                     <TrendingUp className="w-4 h-4" />
@@ -519,7 +544,7 @@ const Home = () => {
                 ) : mode === 'agents' ? (
                   <>
                     <Waves className="w-4 h-4" />
-                    <span>Curved</span>
+                    <span>Curve</span>
                   </>
                 ) : null}
                 <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
@@ -598,7 +623,7 @@ const Home = () => {
                     }`}
                   >
                     <Waves className="w-4 h-4" />
-                    <span>Curved</span>
+                    <span>Curve</span>
                   </button>
                 </div>
               )}
@@ -624,12 +649,12 @@ const Home = () => {
                       borderRadius: '4px',
                       height: '8px'
                     }}
-                    disabled={isAnimating}
+                    disabled={isAnimating || !mode}
                   />
                 </div>
   
                 {/* Coin Amount - Hide for 'both', 'spots', and 'agents' mode, show SOL for 'bid', Token % for 'ask', dollar for others */}
-                {mode !== 'both' && mode !== 'spots' && mode !== 'agents' && (
+                {mode && mode !== 'both' && mode !== 'spots' && mode !== 'agents' && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-gray-400 text-xs sm:text-sm font-medium">
@@ -657,13 +682,13 @@ const Home = () => {
                         borderRadius: '4px',
                         height: '8px'
                       }}
-                      disabled={isAnimating}
+                      disabled={isAnimating || !mode}
                     />
                   </div>
                 )}
   
                 {/* Show SOL/Token controls for 'both', 'spots', and 'agents' mode */}
-                {(mode === 'both' || mode === 'spots' || mode === 'agents') && (
+                {mode && (mode === 'both' || mode === 'spots' || mode === 'agents') && (
                   <>
                     <div className="pt-2 border-t border-gray-800">
                       <div className="flex items-center justify-between mb-2">
@@ -687,7 +712,7 @@ const Home = () => {
                           borderRadius: '4px',
                           height: '8px'
                         }}
-                        disabled={isAnimating}
+                        disabled={isAnimating || !mode}
                       />
                     </div>
   
@@ -713,7 +738,7 @@ const Home = () => {
                           borderRadius: '4px',
                           height: '8px'
                         }}
-                        disabled={isAnimating}
+                        disabled={isAnimating || !mode}
                       />
                     </div>
   
@@ -734,10 +759,13 @@ const Home = () => {
             <div className="flex gap-2 sm:gap-3">
               <button
                 onClick={() => setIsAnimating(!isAnimating)}
-                className={`flex-1 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-                  isAnimating
-                    ? 'bg-red-600 hover:bg-red-700 text-white'
-                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                disabled={!mode}
+                className={`flex-1 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-bold transition-all ${
+                  !mode
+                    ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                    : isAnimating
+                    ? 'bg-red-600 hover:bg-red-700 text-white cursor-pointer'
+                    : 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer'
                 }`}
                 style={{ boxShadow: '0 4px 12px -2px rgba(0, 0, 0, 0.5)' }}
               >
@@ -748,7 +776,7 @@ const Home = () => {
                   setTotalFees(0);
                   setCurrentWave(0);
                   setIsAnimating(false);
-                  setMode('combined');
+                  setMode(null);
                   setWaveDirection('forward');
                   setSolPercent(50);
                   setTokenPercent(50);
