@@ -9,6 +9,24 @@ import metlogo from '../assets/metlogo.png';
 import luffy from '../assets/luggy.JPG';
 import lplogo from '../assets/lplogo.png';
 
+// Generate random pattern for agents mode
+const generateRandomPattern = () => {
+  const patternLength = 6 + Math.floor(Math.random() * 4); // 6-9 patterns
+  const patterns = [];
+  for (let i = 0; i < patternLength; i++) {
+    if (i % 3 === 2) {
+      // Every 3rd pattern is 0 (come back to center)
+      patterns.push(0);
+    } else {
+      // Random percentage between -90 and 90 (negative = left, positive = right)
+      const isNegative = Math.random() < 0.5;
+      const percent = Math.floor(Math.random() * 90) + 10; // 10 to 100
+      patterns.push(isNegative ? -percent : percent);
+    }
+  }
+  return patterns;
+};
+
 const Home = () => {
     const [mode, setMode] = useState(null);
     const [binSteps, setBinSteps] = useState(20);
@@ -24,7 +42,14 @@ const Home = () => {
     
     const animationRef = useRef(null);
     const dropdownRef = useRef(null);
-    const bounceStateRef = useRef({ phase: 0, goingOut: true, randomRanges: [] }); // For agents mode bouncing with random ranges
+    const bounceStateRef = useRef({ 
+      phase: 0, 
+      goingOut: true, 
+      patternIndex: 0, 
+      patterns: generateRandomPattern(),
+      maxRight: 0,  // Track maximum right position reached
+      maxLeft: 0   // Track maximum left position reached
+    }); // For agents mode with random pattern
 
     // Get heading based on strategy mode
     const getStrategyHeading = () => {
@@ -141,11 +166,18 @@ const Home = () => {
           setCurrentWave(spotCenter);
           setWaveDirection('forward'); // Move right first
         } else if (mode === 'agents') {
-          // Start from dynamic center based on SOL percentage (like both mode)
-          const agentsDynamicCenter = Math.floor((solPercent / 100) * binSteps);
-          setCurrentWave(agentsDynamicCenter); // Start from dynamic center
+          // Start from the center point
+          const agentsCenter = Math.floor((solPercent / 100) * binSteps);
+          setCurrentWave(agentsCenter); // Start from center
           setWaveDirection('forward'); // Move right first
-          bounceStateRef.current = { phase: 0, goingOut: true, randomRanges: [] }; // Reset bounce state
+          bounceStateRef.current = { 
+            phase: 0, 
+            goingOut: true, 
+            patternIndex: 0, 
+            patterns: generateRandomPattern(),
+            maxRight: agentsCenter,  // Start at center
+            maxLeft: agentsCenter    // Start at center
+          }; // Reset with random pattern
         } else {
           setCurrentWave(0); // Start from left for ask/combined
           setWaveDirection('forward'); // Move right first
@@ -167,17 +199,22 @@ const Home = () => {
             // All bars are blue for spots mode
             return '#4EABD0';
           case 'agents':
-            // Curved strategy: Gradient from orange (left/bid) to purple (right/ask)
-            // Based on position relative to dynamic center (like both mode)
+            // Curved strategy: Blue on left, gradient (orange to purple) on right
+            const agentCenter = Math.floor((solPercent / 100) * binSteps);
+            // Left side (before center) is blue
+            if (index < agentCenter) {
+              return '#4267B2';
+            }
+            // Right side (from center onwards) is gradient from orange to purple
             // eslint-disable-next-line no-case-declarations
-            const agentProgress = index / binSteps; // 0 to 1 across all bins
+            const rightProgress = (binSteps - agentCenter) > 0 ? (index - agentCenter) / (binSteps - agentCenter) : 0; // 0 to 1 from center to right
             // Orange (#F97316 = rgb(249, 115, 22)) to Purple (#A855F7 = rgb(168, 85, 247))
             // eslint-disable-next-line no-case-declarations
-            const r = Math.floor(249 + (168 - 249) * agentProgress);
+            const r = Math.floor(249 + (168 - 249) * rightProgress);
             // eslint-disable-next-line no-case-declarations
-            const g = Math.floor(115 + (85 - 115) * agentProgress);
+            const g = Math.floor(115 + (85 - 115) * rightProgress);
             // eslint-disable-next-line no-case-declarations
-            const b = Math.floor(22 + (247 - 22) * agentProgress);
+            const b = Math.floor(22 + (247 - 22) * rightProgress);
             return `rgb(${r}, ${g}, ${b})`;
           default: return '#8B5CF6';
         }
@@ -204,16 +241,86 @@ const Home = () => {
         // Spots mode: purple animation going left to right
         if (index < currentWave) return '#563AC9';
       } else if (mode === 'agents') {
-        // Agents mode: blue spreads from center outward
-        // The blue color radiates from the center point as the wave moves
+        // Agents mode: smooth dynamic colors for each bin based on wave position
         const center = Math.floor((solPercent / 100) * binSteps);
-        // Blue spreads from center - paint bins that are between center and current wave position
-        const isBetweenCenterAndWave = 
-          (currentWave >= center && index >= center && index <= currentWave) ||
-          (currentWave <= center && index <= center && index >= currentWave);
+        const maxLeftDistance = center;
         
-        if (isBetweenCenterAndWave) {
-          return '#4267B2';
+        // Calculate intensity multiplier based on wave position
+        let intensityMultiplier = 1.0;
+        if (currentWave < center) {
+          const waveLeftDistance = center - currentWave;
+          const waveLeftPercent = maxLeftDistance > 0 ? (waveLeftDistance / maxLeftDistance) * 100 : 0;
+          intensityMultiplier = 1.0 + Math.min(waveLeftPercent / 100, 0.5);
+        }
+        
+        // LEFT SIDE BINS - Dynamic based on wave position
+        if (index < center) {
+          // When wave moves left from center:
+          // - Bins to the LEFT of wave (index < currentWave): blue
+          // - Bins to the RIGHT of wave (index >= currentWave && index < center): gradient
+          
+          if (currentWave < center) {
+            // Wave is moving left
+            if (index < currentWave) {
+              // Left of wave: blue
+              return '#4267B2';
+            } else {
+              // Right of wave (between wave and center): gradient
+              const leftProgress = center > 0 ? index / center : 0;
+              const r = Math.floor(66 + (249 - 66) * leftProgress);
+              const g = Math.floor(103 + (115 - 103) * leftProgress);
+              const b = Math.floor(178 + (22 - 178) * leftProgress);
+              return `rgb(${r}, ${g}, ${b})`;
+            }
+          } else {
+            // Wave is at center or moving right: all left side bins stay blue
+            return '#4267B2';
+          }
+        }
+        
+        // RIGHT SIDE BINS
+        if (index >= center) {
+          // Calculate gradient progress for this specific bin
+          const rightProgress = (binSteps - center) > 0 ? (index - center) / (binSteps - center) : 0;
+          
+          // Base gradient from orange to purple
+          let baseR = 249 + (168 - 249) * rightProgress;
+          let baseG = 115 + (85 - 115) * rightProgress;
+          let baseB = 22 + (247 - 22) * rightProgress;
+          
+          // Blue color
+          const blueR = 66;
+          const blueG = 103;
+          const blueB = 178;
+          
+          // Blend factor: more blue when wave has passed through and is moving right
+          // More gradient when wave is moving left or hasn't reached
+          let blueBlend = 0;
+          if (index <= currentWave && currentWave >= center) {
+            // Wave has passed through and is moving right - show blue
+            blueBlend = 1;
+          } else if (index > currentWave && currentWave < center) {
+            // Wave is moving left and hasn't reached - show enhanced gradient
+            blueBlend = 0;
+          } else if (index <= currentWave && currentWave < center) {
+            // Wave has passed through but is moving left - blend based on distance
+            const distanceFromCenter = currentWave - center;
+            blueBlend = Math.max(0, 1 - Math.abs(distanceFromCenter) / maxLeftDistance);
+          }
+          
+          // Smooth blend between gradient and blue
+          let finalR = baseR + (blueR - baseR) * blueBlend;
+          let finalG = baseG + (blueG - baseG) * blueBlend;
+          let finalB = baseB + (blueB - baseB) * blueBlend;
+          
+          // Apply intensity multiplier when wave is moving left
+          if (currentWave < center) {
+            finalR = Math.min(255, finalR + (255 - finalR) * (intensityMultiplier - 1) * 0.3);
+            finalG = Math.min(255, finalG + (255 - finalG) * (intensityMultiplier - 1) * 0.3);
+            finalB = Math.min(255, finalB + (255 - finalB) * (intensityMultiplier - 1) * 0.3);
+          }
+          
+          return `rgb(${Math.floor(finalR)}, ${Math.floor(finalG)}, ${Math.floor(finalB)})`;
         }
       } else {
         // Ask/Combined: starts from left, paints right to left  
@@ -231,17 +338,62 @@ const Home = () => {
           // All bars are blue for spots mode
           return '#4EABD0';
         case 'agents':
-          // Curved strategy: Gradient from orange (left/bid) to purple (right/ask)
-          // Based on position relative to dynamic center (like both mode)
+          // Curved strategy: Blue on left, gradient (orange to purple) on right
+          const agentCenter = Math.floor((solPercent / 100) * binSteps);
+          const maxLeftDistance = agentCenter;
+          
+          // Check if wave is -20% or more from center
+          let leftPercent = 0;
+          if (isAnimating && currentWave < agentCenter) {
+            const leftDistance = agentCenter - currentWave;
+            leftPercent = (leftDistance / maxLeftDistance) * 100; // 0 to 100%
+          }
+          
+          // If wave is -20% or more from center, left side shows gradient instead of blue
+          if (leftPercent >= 20 && index < agentCenter) {
+            // Show gradient from blue to orange at center for left side
+            const leftProgress = index / agentCenter; // 0 to 1 from left to center
+            // Gradient from blue (#4267B2 = rgb(66, 103, 178)) to orange (#F97316 = rgb(249, 115, 22))
+            // eslint-disable-next-line no-case-declarations
+            const rLeft = Math.floor(66 + (249 - 66) * leftProgress);
+            // eslint-disable-next-line no-case-declarations
+            const gLeft = Math.floor(103 + (115 - 103) * leftProgress);
+            // eslint-disable-next-line no-case-declarations
+            const bLeft = Math.floor(178 + (22 - 178) * leftProgress);
+            return `rgb(${rLeft}, ${gLeft}, ${bLeft})`;
+          }
+          
+          // Calculate intensity based on how far left the wave is (negative percentages)
+          // If wave is to the left of center, increase gradient intensity
+          let intensityMultiplier = 1.0;
+          if (isAnimating && currentWave < agentCenter) {
+            // Increase intensity when moving left (e.g., -20% means 20% left)
+            // Intensity increases up to 1.5x when at -20% or more
+            intensityMultiplier = 1.0 + Math.min(leftPercent / 100, 0.5); // Max 1.5x intensity
+          }
+          
+          // Left side (before center) is blue (unless -20% condition above applies)
+          if (index < agentCenter) {
+            return '#4267B2';
+          }
+          // Right side (from center onwards) is gradient from orange to purple
           // eslint-disable-next-line no-case-declarations
-          const agentProgressDefault = index / binSteps; // 0 to 1 across all bins
+          const rightProgress = (index - agentCenter) / (binSteps - agentCenter); // 0 to 1 from center to right
           // Orange (#F97316 = rgb(249, 115, 22)) to Purple (#A855F7 = rgb(168, 85, 247))
+          // Apply intensity multiplier to make colors more vibrant
           // eslint-disable-next-line no-case-declarations
-          const rDefault = Math.floor(249 + (168 - 249) * agentProgressDefault);
+          const baseR = 249 + (168 - 249) * rightProgress;
           // eslint-disable-next-line no-case-declarations
-          const gDefault = Math.floor(115 + (85 - 115) * agentProgressDefault);
+          const baseG = 115 + (85 - 115) * rightProgress;
           // eslint-disable-next-line no-case-declarations
-          const bDefault = Math.floor(22 + (247 - 22) * agentProgressDefault);
+          const baseB = 22 + (247 - 22) * rightProgress;
+          // Increase intensity by moving colors towards their max values
+          // eslint-disable-next-line no-case-declarations
+          const rDefault = Math.floor(Math.min(255, baseR + (255 - baseR) * (intensityMultiplier - 1) * 0.3));
+          // eslint-disable-next-line no-case-declarations
+          const gDefault = Math.floor(Math.min(255, baseG + (255 - baseG) * (intensityMultiplier - 1) * 0.3));
+          // eslint-disable-next-line no-case-declarations
+          const bDefault = Math.floor(Math.min(255, baseB + (255 - baseB) * (intensityMultiplier - 1) * 0.3));
           return `rgb(${rDefault}, ${gDefault}, ${bDefault})`;
         default: return '#8B5CF6';
       }
@@ -252,7 +404,7 @@ const Home = () => {
   
       const animate = () => {
         setCurrentWave(prev => {
-          // Special bouncing animation for agents mode with random slot-like percentages
+          // Special animation for agents mode: start from center, then follow pattern
           if (mode === 'agents') {
             const center = Math.floor((solPercent / 100) * binSteps);
             const maxRight = binSteps - 1;
@@ -260,80 +412,114 @@ const Home = () => {
             const maxRightDistance = maxRight - center;
             const maxLeftDistance = center - maxLeft;
             
-            // Get current bounce state
-            let { phase, goingOut, randomRanges } = bounceStateRef.current;
-            
-            // Generate random ranges like a slot machine when we need new ones
-            if (randomRanges.length === 0 || phase >= randomRanges.length) {
-              // Generate random percentages (10% to 80% range for variety)
-              const randomRightPercent = 0.1 + Math.random() * 0.7; // 10% to 80%
-              const randomLeftPercent = 0.1 + Math.random() * 0.7; // 10% to 80%
-              
-              // Alternate between right and left, creating random patterns
-              randomRanges = [
-                { direction: 'right', range: Math.floor(maxRightDistance * randomRightPercent) },
-                { direction: 'left', range: Math.floor(maxLeftDistance * randomLeftPercent) },
-                { direction: 'right', range: Math.floor(maxRightDistance * (0.1 + Math.random() * 0.7)) },
-                { direction: 'left', range: Math.floor(maxLeftDistance * (0.1 + Math.random() * 0.7)) },
-                { direction: 'right', range: Math.floor(maxRightDistance * (0.1 + Math.random() * 0.7)) }
-              ];
-              bounceStateRef.current.randomRanges = randomRanges;
-            }
-            
-            const pattern = randomRanges[phase % randomRanges.length];
-            const target = pattern.direction === 'right' 
-              ? Math.min(center + pattern.range, maxRight)
-              : Math.max(center - pattern.range, maxLeft);
+            // Get current state
+            let { patternIndex, patterns, goingOut } = bounceStateRef.current;
             
             let next = prev;
-            let newGoingOut = goingOut;
-            let newPhase = phase;
+            const currentPercent = patterns[patternIndex];
             
-            if (goingOut) {
-              // Moving away from center
-              if (pattern.direction === 'right') {
-                next = Math.min(prev + 1, target);
-                if (next >= target) {
-                  newGoingOut = false; // Start coming back
-                }
-              } else {
-                next = Math.max(prev - 1, target);
-                if (next <= target) {
-                  newGoingOut = false; // Start coming back
-                }
-              }
-            } else {
-              // Coming back to center
+            if (currentPercent === 0) {
+              // Come back to center
               if (prev > center) {
                 next = Math.max(prev - 1, center);
+                if (next === center) {
+                  // Reached center, move to next pattern
+                  if (patternIndex + 1 >= patterns.length) {
+                    bounceStateRef.current.patterns = generateRandomPattern();
+                    bounceStateRef.current.patternIndex = 0;
+                  } else {
+                    bounceStateRef.current.patternIndex = patternIndex + 1;
+                  }
+                  bounceStateRef.current.goingOut = true;
+                }
               } else if (prev < center) {
                 next = Math.min(prev + 1, center);
-              } else {
-                // Reached center, move to next phase with new random range
-                newPhase = phase + 1;
-                // Generate new random range for this phase if needed
-                if (newPhase >= randomRanges.length) {
-                  const randomPercent = 0.1 + Math.random() * 0.7;
-                  const direction = newPhase % 2 === 0 ? 'right' : 'left';
-                  const range = direction === 'right' 
-                    ? Math.floor(maxRightDistance * randomPercent)
-                    : Math.floor(maxLeftDistance * randomPercent);
-                  randomRanges.push({ direction, range });
-                  bounceStateRef.current.randomRanges = randomRanges;
+                if (next === center) {
+                  // Reached center, move to next pattern
+                  if (patternIndex + 1 >= patterns.length) {
+                    bounceStateRef.current.patterns = generateRandomPattern();
+                    bounceStateRef.current.patternIndex = 0;
+                  } else {
+                    bounceStateRef.current.patternIndex = patternIndex + 1;
+                  }
+                  bounceStateRef.current.goingOut = true;
                 }
-                newGoingOut = true;
-                // Start moving in the new direction
-                const nextPattern = randomRanges[newPhase % randomRanges.length];
-                if (nextPattern.direction === 'right') {
-                  next = center + 1;
+              } else {
+                // At center, move to next pattern
+                if (patternIndex + 1 >= patterns.length) {
+                  bounceStateRef.current.patterns = generateRandomPattern();
+                  bounceStateRef.current.patternIndex = 0;
                 } else {
-                  next = center - 1;
+                  bounceStateRef.current.patternIndex = patternIndex + 1;
+                }
+                bounceStateRef.current.goingOut = true;
+              }
+            } else {
+              // Calculate target position based on percentage
+              // Positive percentages go right, negative go left
+              let target;
+              if (currentPercent > 0) {
+                // Moving right
+                const distance = Math.floor(maxRightDistance * (currentPercent / 100));
+                target = Math.min(center + distance, maxRight);
+              } else {
+                // Moving left (negative percentage, e.g., -20)
+                const distance = Math.floor(maxLeftDistance * (Math.abs(currentPercent) / 100));
+                target = Math.max(center - distance, maxLeft);
+              }
+              
+              if (goingOut) {
+                // Moving from center to target
+                if (target > center) {
+                  next = Math.min(prev + 1, target);
+                  // Update maxRight when moving right
+                  if (next > bounceStateRef.current.maxRight) {
+                    bounceStateRef.current.maxRight = next;
+                  }
+                } else {
+                  next = Math.max(prev - 1, target);
+                  // Update maxLeft when moving left
+                  if (next < bounceStateRef.current.maxLeft) {
+                    bounceStateRef.current.maxLeft = next;
+                  }
+                }
+                
+                if ((target > center && next >= target) || (target < center && next <= target)) {
+                  // Reached target, check if next pattern is 0 (come back)
+                  const nextPatternIndex = patternIndex + 1 >= patterns.length ? 0 : patternIndex + 1;
+                  if (patterns[nextPatternIndex] === 0) {
+                    bounceStateRef.current.goingOut = false;
+                  } else {
+                    // Move to next pattern
+                    if (patternIndex + 1 >= patterns.length) {
+                      bounceStateRef.current.patterns = generateRandomPattern();
+                      bounceStateRef.current.patternIndex = 0;
+                    } else {
+                      bounceStateRef.current.patternIndex = nextPatternIndex;
+                    }
+                    bounceStateRef.current.goingOut = true;
+                  }
+                }
+              } else {
+                // Coming back to center
+                if (prev > center) {
+                  next = Math.max(prev - 1, center);
+                } else {
+                  next = Math.min(prev + 1, center);
+                }
+                
+                if (next === center) {
+                  // Reached center, move to next pattern
+                  if (patternIndex + 1 >= patterns.length) {
+                    bounceStateRef.current.patterns = generateRandomPattern();
+                    bounceStateRef.current.patternIndex = 0;
+                  } else {
+                    bounceStateRef.current.patternIndex = patternIndex + 1;
+                  }
+                  bounceStateRef.current.goingOut = true;
                 }
               }
             }
-            
-            // Update bounce state
-            bounceStateRef.current = { phase: newPhase, goingOut: newGoingOut, randomRanges };
             
             const fee = bars[next].liquidity * 0.003;
             setTotalFees(total => total + fee);
@@ -360,10 +546,10 @@ const Home = () => {
           
           return next;
         });
-        animationRef.current = setTimeout(animate, 150);
+        animationRef.current = setTimeout(animate, 100);
       };
   
-      animationRef.current = setTimeout(animate, 150);  
+      animationRef.current = setTimeout(animate, 100);  
       return () => clearTimeout(animationRef.current);
     }, [isAnimating, waveDirection, binSteps, bars, mode, solPercent]);
   
@@ -436,10 +622,10 @@ const Home = () => {
                   {mode === 'agents' && (
                     <Link 
                       to="/curve" 
-                      className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-[#ff4757]/20 via-[#c44569]/20 to-[#8b5cf6]/20 border border-[#8b5cf6]/30 hover:border-[#8b5cf6]/50 transition-all duration-200 hover:scale-110 active:scale-95 group"
+                      className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-r from-[#ff4757]/20 via-[#c44569]/20 to-[#8b5cf6]/20 border-2 border-[#8b5cf6]/40 hover:border-[#8b5cf6]/70 transition-all duration-300 hover:scale-125 active:scale-100 group cursor-pointer z-10 relative shadow-lg hover:shadow-[#8b5cf6]/50 animate-pulse hover:animate-none"
                       title="Learn more about Curve strategy"
                     >
-                      <Info className="w-4 h-4 sm:w-5 sm:h-5 text-[#8b5cf6] group-hover:text-[#ff4757] transition-colors duration-200" />
+                      <Info className="w-5 h-5 sm:w-6 sm:h-6 text-[#8b5cf6] group-hover:text-[#ff4757] transition-colors duration-300 group-hover:rotate-12" />
                     </Link>
                   )}
                 </div>

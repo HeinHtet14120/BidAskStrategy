@@ -28,33 +28,33 @@ const App = () => {
         <Route 
           path="/" 
           element={
-            <div className="h-[120vh] bg-gray-100 relative">
-              <Home />
-              <div className="absolute top-0 left-0 w-full">
-                <CurvedLoop 
-                  marqueeText="STILL IN DEVELOPMENT"
-                  speed={1}
-                  curveAmount={0}
-                  direction="right"
-                  interactive={false}
-                  gradient={['#ff6b35', '#ff4757', '#c44569', '#8b5cf6', '#6c5ce7']}
-                  className="text-[14px] sm:text-[18px] md:text-[24px] lg:text-[28px] xl:text-[32px] font-bold w-full h-full"
-                />
-              </div>
-              {/* <div className="fixed inset-0 z-50 text-cursor-wrapper">
-                <TextCursor
-                  icons={customIcons}
-                  delay={0.01}
-                  radius={100}
-                  spawnInterval={150}
-                  randomFloat={true}
-                  exitDuration={0.5}
-                  removalInterval={2000}
-                  maxPoints={12}
-                  minDistance={20}
-                />
-              </div> */}
-            </div>
+    <div className="h-[120vh] bg-gray-100 relative">
+      <Home />
+      <div className="absolute top-0 left-0 w-full">
+        <CurvedLoop 
+          marqueeText="STILL IN DEVELOPMENT"
+          speed={1}
+          curveAmount={0}
+          direction="right"
+          interactive={false}
+          gradient={['#ff6b35', '#ff4757', '#c44569', '#8b5cf6', '#6c5ce7']}
+          className="text-[14px] sm:text-[18px] md:text-[24px] lg:text-[28px] xl:text-[32px] font-bold w-full h-full"
+        />
+      </div>
+      {/* <div className="fixed inset-0 z-50 text-cursor-wrapper">
+        <TextCursor
+          icons={customIcons}
+          delay={0.01}
+          radius={100}
+          spawnInterval={150}
+          randomFloat={true}
+          exitDuration={0.5}
+          removalInterval={2000}
+          maxPoints={12}
+          minDistance={20}
+        />
+      </div> */}
+    </div>
           } 
         />
         <Route path="/curve" element={<Curve />} />

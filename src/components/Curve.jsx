@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import metlogo from '../assets/metlogo.png';
+import metcurvepool from '../assets/metcurvepool.png';
 import '../styles/Curve.css';
 
 const Curve = () => {
@@ -19,7 +20,7 @@ const Curve = () => {
       });
     }, observerOptions);
 
-    const factSections = document.querySelectorAll('.fact-section');
+    const factSections = document.querySelectorAll('.fact-section, .strategy-section, .pool-setup-section');
     factSections.forEach((section, index) => {
       section.style.transitionDelay = `${index * 0.1}s`;
       observer.observe(section);
@@ -263,6 +264,152 @@ const Curve = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* ===== MY STRATEGY SECTION ===== */}
+        <section className="strategy-section">
+          <div className="strategy-header">
+            <div className="strategy-badge">💎 MY STRATEGY</div>
+            <h2 className="strategy-title">Only Do Quickies</h2>
+            <p className="strategy-subtitle">The simple 3-step playbook for printing consistent fees without getting rekt</p>
+          </div>
+
+          <div className="strategy-visual">
+            {/* 3-Step Flow */}
+            <div className="strategy-flow">
+              <div className="strategy-step step-1">
+                <div className="step-icon-wrap">
+                  <span className="step-icon">🎯</span>
+                  <span className="step-number">1</span>
+                </div>
+                <h3 className="step-title">ENTER IN VOLUME</h3>
+                <p className="step-desc">Wait for high activity. Don't jump into dead pools.</p>
+                <span className="step-trigger">📊 Volume spike = GO</span>
+              </div>
+
+              <span className="flow-arrow arrow-1">→</span>
+
+              <div className="strategy-step step-2">
+                <div className="step-icon-wrap">
+                  <span className="step-icon">💸</span>
+                  <span className="step-number">2</span>
+                </div>
+                <h3 className="step-title">PRINT FEES</h3>
+                <p className="step-desc">Ride the action. Let swaps flow through your range.</p>
+                <span className="step-trigger">🔥 Action = Earnings</span>
+              </div>
+
+              <span className="flow-arrow arrow-2">→</span>
+
+              <div className="strategy-step step-3">
+                <div className="step-icon-wrap">
+                  <span className="step-icon">🚪</span>
+                  <span className="step-number">3</span>
+                </div>
+                <h3 className="step-title">EXIT BEFORE QUIET</h3>
+                <p className="step-desc">Don't overstay. Leave before volume dies.</p>
+                <span className="step-trigger">📉 Cooling = GTFO</span>
+              </div>
+            </div>
+
+            {/* Strategy Chart Visualization */}
+            <div className="strategy-chart">
+              <span className="chart-label-y">VOLUME</span>
+              <div className="chart-bg">
+                <div className="entry-zone">
+                  <span className="zone-tag">ENTER</span>
+                </div>
+                <div className="buy-zone">
+                  <span className="zone-tag">PRINTING AREA</span>
+                </div>
+                <div className="exit-zone">
+                  <span className="zone-tag">EXIT</span>
+                </div>
+                <div className="volume-bars">
+                  <div className="vol-bar low" style={{ height: '15%' }}></div>
+                  <div className="vol-bar low" style={{ height: '20%' }}></div>
+                  <div className="vol-bar" style={{ height: '35%' }}></div>
+                  <div className="vol-bar active" style={{ height: '70%' }}></div>
+                  <div className="vol-bar active" style={{ height: '90%' }}></div>
+                  <div className="vol-bar active" style={{ height: '85%' }}></div>
+                  <div className="vol-bar active" style={{ height: '75%' }}></div>
+                  <div className="vol-bar" style={{ height: '50%' }}></div>
+                  <div className="vol-bar" style={{ height: '35%' }}></div>
+                  <div className="vol-bar low" style={{ height: '20%' }}></div>
+                  <div className="vol-bar low" style={{ height: '12%' }}></div>
+                  <div className="vol-bar low" style={{ height: '10%' }}></div>
+                </div>
+              </div>
+              <div className="chart-x-axis">
+                <span>Quiet</span>
+                <span>Building</span>
+                <span>🔥 PEAK ACTION 🔥</span>
+                <span>Cooling</span>
+                <span>Dead</span>
+              </div>
+            </div>
+
+            {/* Summary */}
+            <div className="strategy-summary">
+              <div className="summary-box">
+                <p className="summary-text">
+                  <span className="green">Enter in volume</span> → 
+                  <span className="orange"> Print fees during action</span> → 
+                  <span className="red"> Exit before things go quiet</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===== POOL SETUP GUIDE SECTION ===== */}
+        <section className="pool-setup-section">
+          <div className="pool-setup-header">
+            <div className="pool-setup-badge">⚙️ POOL SETUP</div>
+            <h2 className="pool-setup-title">Set The Pool Right</h2>
+            <p className="pool-setup-subtitle">Before any quickie, I dial in these settings.</p>
+          </div>
+
+          <div className="pool-setup-screenshot">
+            <div className="screenshot-wrapper">
+              <img src={metcurvepool} alt="Meteora Curve Pool Setup" />
+            </div>
+          </div>
+
+          <div className="params-row">
+            <div className="param-card param-range">
+              <div className="param-header">
+                <span className="param-icon">🎯</span>
+                <span className="param-name">Range</span>
+                <span className="param-value">-5% to +5~6%</span>
+              </div>
+              <p className="param-desc"><strong>Tight and spicy</strong> — for max fee action.</p>
+            </div>
+
+            <div className="param-card param-bins">
+              <div className="param-header">
+                <span className="param-icon">📊</span>
+                <span className="param-name">Bin Steps</span>
+                <span className="param-value">Depends</span>
+              </div>
+              <p className="param-desc"><strong>Token's mood</strong> — calm = small, degen = bigger.</p>
+            </div>
+
+            <div className="param-card param-curve">
+              <div className="param-header">
+                <span className="param-icon">📈</span>
+                <span className="param-name">Curve Level</span>
+                <span className="param-value">Dynamic</span>
+              </div>
+              <p className="param-desc"><strong>Chart cooking?</strong> Turn it up. Meh? Keep low.</p>
+            </div>
+          </div>
+
+          <div className="warning-footer">
+            <span className="warning-icon">⚠️</span>
+            <span className="warning-text">Bad setup = No fees.</span>
+            <span className="warning-simple">Simple.</span>
           </div>
         </section>
       </div>
