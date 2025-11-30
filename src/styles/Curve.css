@@ -137,6 +137,37 @@
   direction: ltr;
 }
 
+/* Wrapper for facts without photos - side by side */
+.curve-page .facts-no-photo-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 80px;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.curve-page .facts-no-photo-wrapper.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Facts without photos - full width text */
+.curve-page .fact-section.fact-no-photo {
+  display: block;
+  grid-template-columns: none;
+  margin-bottom: 0;
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 30px;
+}
+
+.curve-page .fact-section.fact-no-photo .fact-text {
+  padding: 0;
+}
+
 /* Text content */
 .curve-page .fact-text {
   padding: 20px;
@@ -1228,7 +1259,7 @@
 /* Parameters row */
 .curve-page .params-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   margin-bottom: 25px;
 }
@@ -1367,6 +1398,15 @@
 
   .curve-page .fact-section:nth-child(even) {
     direction: ltr;
+  }
+
+  .curve-page .facts-no-photo-wrapper {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+
+  .curve-page .fact-section.fact-no-photo {
+    margin-bottom: 25px;
   }
 
   .curve-page h1 { font-size: 2.5rem; }

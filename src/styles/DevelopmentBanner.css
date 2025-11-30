@@ -1,0 +1,90 @@
+.dev-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(15, 16, 21, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 12px 20px;
+  padding-top: calc(12px + env(safe-area-inset-top));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dev-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dev-banner-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dev-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-top-color: rgba(255, 71, 87, 0.8);
+  border-radius: 50%;
+  animation: dev-spin 0.8s linear infinite;
+}
+
+@keyframes dev-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.dev-banner-text {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.dev-text-main {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dev-text-dots {
+  color: rgba(255, 71, 87, 0.6);
+  min-width: 20px;
+  text-align: left;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .dev-banner {
+    padding: 10px 16px;
+    padding-top: calc(10px + env(safe-area-inset-top));
+    height: 44px;
+  }
+
+  .dev-banner-text {
+    font-size: 12px;
+  }
+
+  .dev-spinner {
+    width: 14px;
+    height: 14px;
+    border-width: 1.5px;
+  }
+
+  .dev-banner-content {
+    gap: 10px;
+  }
+}
+
