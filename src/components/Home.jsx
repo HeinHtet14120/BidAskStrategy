@@ -8,6 +8,7 @@ import {
 import metlogo from '../assets/metlogo.png';
 import luffy from '../assets/luggy.JPG';
 import lplogo from '../assets/lplogo.png';
+import Footer from './Footer';
 
 // Generate random pattern for agents mode
 const generateRandomPattern = () => {
@@ -37,7 +38,6 @@ const Home = () => {
     const [totalFees, setTotalFees] = useState(0);
     const [solPercent, setSolPercent] = useState(50); // SOL percentage for 'both' mode
     const [tokenPercent, setTokenPercent] = useState(50); // Token percentage for 'both' mode
-    const [copiedSol, setCopiedSol] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     
     const animationRef = useRef(null);
@@ -200,6 +200,7 @@ const Home = () => {
             return '#4EABD0';
           case 'agents':
             // Curved strategy: Blue on left, gradient (orange to purple) on right
+            // eslint-disable-next-line no-case-declarations
             const agentCenter = Math.floor((solPercent / 100) * binSteps);
             // Left side (before center) is blue
             if (index < agentCenter) {
@@ -339,11 +340,15 @@ const Home = () => {
           return '#4EABD0';
         case 'agents':
           // Curved strategy: Blue on left, gradient (orange to purple) on right
+          // eslint-disable-next-line no-case-declarations
           const agentCenter = Math.floor((solPercent / 100) * binSteps);
+          // eslint-disable-next-line no-case-declarations
           const maxLeftDistance = agentCenter;
           
           // Check if wave is -20% or more from center
+          // eslint-disable-next-line no-case-declarations
           let leftPercent = 0;
+          // eslint-disable-next-line no-case-declarations
           if (isAnimating && currentWave < agentCenter) {
             const leftDistance = agentCenter - currentWave;
             leftPercent = (leftDistance / maxLeftDistance) * 100; // 0 to 100%
@@ -365,6 +370,7 @@ const Home = () => {
           
           // Calculate intensity based on how far left the wave is (negative percentages)
           // If wave is to the left of center, increase gradient intensity
+          // eslint-disable-next-line no-case-declarations
           let intensityMultiplier = 1.0;
           if (isAnimating && currentWave < agentCenter) {
             // Increase intensity when moving left (e.g., -20% means 20% left)
@@ -585,28 +591,19 @@ const Home = () => {
       };
     }, [isDropdownOpen]);
 
-    // Copy Solana address and update tooltip
-    const handleCopySol = async () => {
-      try {
-        await navigator.clipboard.writeText('2scUApKr4Q6A8YoXdsAnHGNjFxGPvsZKvMWadkphKzR7');
-        setCopiedSol(true);
-        setTimeout(() => setCopiedSol(false), 2000);
-      } catch (err) {
-        console.error('Failed to copy:', err);
-      }
-    };
   
     return (
+      <>
       <div className="absolute w-full h-full top-0 left-0 z-0 py-10 bg-[#0a0b0f] flex items-center justify-center p-2 sm:p-4" style={{ paddingTop: 'calc(3rem + env(safe-area-inset-top))' }}>
         <div className="w-full flex flex-col lg:flex-row items-center justify-center lg:justify-evenly gap-4 lg:gap-4">
           <div className="flex flex-row lg:flex-col items-center justify-center gap-4 lg:gap-32 order-2 lg:order-1">
-            <div onClick={() => window.open('https://x.com/MeteoraAG', '_blank')} className="flex items-center gap-2 cursor-pointer">
-            <img src={metlogo} alt="logo" className="w-20 h-20 sm:w-30 sm:h-30" />
-            <p className="text-white text-lg sm:text-[25px] font-bold">Meteora</p>
+            <div onClick={() => window.open('https://x.com/MeteoraAG', '_blank')} className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
+            <img src={metlogo} alt="logo" className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 object-contain" />
+            <p className="text-white text-base sm:text-lg md:text-xl lg:text-[25px] font-bold">Meteora</p>
             </div>
-            <div onClick={() => window.open('https://x.com/met_lparmy', '_blank')} className="flex items-center gap-2 cursor-pointer">
-            <img src={lplogo} alt="logo" className="w-20 h-20 sm:w-30 sm:h-30" />
-            <p className="text-white text-base sm:text-[22px] font-bold">LP Army</p>
+            <div onClick={() => window.open('https://x.com/met_lparmy', '_blank')} className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
+            <img src={lplogo} alt="logo" className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 object-contain" />
+            <p className="text-white text-sm sm:text-base md:text-lg lg:text-[22px] font-bold">LP Army</p>
             </div>
           </div>
           {/* Dark Enterprise Card */}
@@ -1029,80 +1026,17 @@ const Home = () => {
               className="flex flex-col items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
             >
               <div className="border-2 border-red-900 rounded-full">
-                <img src={luffy} alt="logo" className="w-20 h-20 sm:w-25 sm:h-25 rounded-full" />
+                <img src={luffy} alt="logo" className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full object-cover" />
               </div>
-              <p className="text-white text-sm sm:text-[18px] font-bold">@biginthe4teen</p>
+              <p className="text-white text-xs sm:text-sm md:text-base lg:text-[18px] font-bold">@biginthe4teen</p>
             </div>
             
-            <Tooltip
-              closeDelay={0}
-              content={
-                copiedSol ? (
-                  <span className="flex items-center gap-2">
-                    <Check className="w-4 h-4" />
-                    <span>Copied!</span>
-                  </span>
-                ) : (
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.6))' }}>
-                    <circle cx="12" cy="12" r="12" fill="url(#solBgGradient)" />
-                    <defs>
-                      <linearGradient id="solBgGradient" x1="12" y1="0" x2="12" y2="24">
-                        <stop offset="0%" stopColor="#1a0b2e" />
-                        <stop offset="100%" stopColor="#2d1b4e" />
-                      </linearGradient>
-                      <linearGradient id="solBottomBar" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#FF00FF" />
-                        <stop offset="100%" stopColor="#9945FF" />
-                      </linearGradient>
-                    </defs>
-                    {/* Top bar - teal */}
-                    <path d="M6 9L18 9L17.5 10.5L5.5 10.5L6 9Z" fill="#14F195" />
-                    {/* Middle bar - teal */}
-                    <path d="M6 11.5L18 11.5L17.5 13L5.5 13L6 11.5Z" fill="#14F195" />
-                    {/* Bottom bar - gradient magenta to purple */}
-                    <path d="M6 14L18 14L17.5 15.5L5.5 15.5L6 14Z" fill="url(#solBottomBar)" />
-                  </svg>
-                )
-              }
-              delay={0}
-              placement="bottom"
-              classNames={{
-                base: "bg-transparent",
-                content: "bg-transparent p-2",
-              }}
-              motionProps={{
-                variants: {
-                  exit: {
-                    opacity: 0,
-                    transition: {
-                      duration: 0.1,
-                      ease: "easeIn",
-                    },
-                  },
-                  enter: {
-                    opacity: 1,
-                    transition: {
-                      duration: 0.15,
-                      ease: "easeOut",
-                    },
-                  },
-                },
-              }}
-            >
-              <Button 
-                disableRipple 
-                variant="light"
-                isIconOnly
-                onClick={handleCopySol}
-                className="mt-2 flex items-center justify-center p-3 bg-transparent hover:bg-[#15161d]/50 text-white rounded-lg transition-all duration-200 hover:scale-105 active:scale-95"
-              >
-                <Coffee className="w-5 h-5 text-[#ff4757]" />
-              </Button>
-            </Tooltip>
           </div>
   
         </div>
       </div>
+      <Footer />
+      </>
     );
 }
 

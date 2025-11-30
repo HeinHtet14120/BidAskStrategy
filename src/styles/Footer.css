@@ -1,0 +1,91 @@
+.app-footer {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  padding: 16px 24px;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.footer-content {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.footer-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  font-weight: 500;
+}
+
+.heart-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 4px;
+}
+
+.heart-icon {
+  width: 18px;
+  height: 18px;
+  color: #ff4757;
+  fill: #ff4757;
+  animation: heartbeat 1.5s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  10% {
+    transform: scale(1.2);
+    opacity: 0.9;
+  }
+  20% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  30% {
+    transform: scale(1.15);
+    opacity: 0.95;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.9;
+  }
+  60% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .app-footer {
+    padding: 16px;
+    margin-top: 30px;
+  }
+
+  .footer-text {
+    font-size: 12px;
+    gap: 6px;
+  }
+
+  .heart-icon {
+    width: 16px;
+    height: 16px;
+  }
+}
+
