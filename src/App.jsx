@@ -1,7 +1,8 @@
 import { Routes, Route } from 'react-router-dom';
 import Home from './components/Home';
 import Curve from './components/Curve';
-import CurvedLoop from './components/CurvedLoop';
+import ComingSoon from './components/ComingSoon';
+import DevelopmentBanner from './components/DevelopmentBanner';
 import TextCursor from './components/TextCursor';
 import { AlertTriangle, Rocket, Zap, Flame, Sparkles } from 'lucide-react';
 import { HeroUIProvider } from '@heroui/react';
@@ -29,18 +30,8 @@ const App = () => {
           path="/" 
           element={
     <div className="h-[120vh] bg-gray-100 relative">
+      <DevelopmentBanner />
       <Home />
-      <div className="absolute top-0 left-0 w-full">
-        <CurvedLoop 
-          marqueeText="STILL IN DEVELOPMENT"
-          speed={1}
-          curveAmount={0}
-          direction="right"
-          interactive={false}
-          gradient={['#ff6b35', '#ff4757', '#c44569', '#8b5cf6', '#6c5ce7']}
-          className="text-[14px] sm:text-[18px] md:text-[24px] lg:text-[28px] xl:text-[32px] font-bold w-full h-full"
-        />
-      </div>
       {/* <div className="fixed inset-0 z-50 text-cursor-wrapper">
         <TextCursor
           icons={customIcons}
@@ -58,6 +49,46 @@ const App = () => {
           } 
         />
         <Route path="/curve" element={<Curve />} />
+        <Route 
+          path="/bid" 
+          element={
+            <ComingSoon 
+              strategyName="Bid" 
+              strategyColor="#F97316"
+              strategyGradient="linear-gradient(135deg, #F97316, #FF6B35)"
+            />
+          } 
+        />
+        <Route 
+          path="/ask" 
+          element={
+            <ComingSoon 
+              strategyName="Ask" 
+              strategyColor="#A855F7"
+              strategyGradient="linear-gradient(135deg, #A855F7, #8B5CF6)"
+            />
+          } 
+        />
+        <Route 
+          path="/bidask" 
+          element={
+            <ComingSoon 
+              strategyName="Bid/Ask" 
+              strategyColor="#8B5CF6"
+              strategyGradient="linear-gradient(135deg, #F97316, #A855F7)"
+            />
+          } 
+        />
+        <Route 
+          path="/spots" 
+          element={
+            <ComingSoon 
+              strategyName="Spots" 
+              strategyColor="#10B981"
+              strategyGradient="linear-gradient(135deg, #10B981, #059669)"
+            />
+          } 
+        />
       </Routes>
     </HeroUIProvider>
   )

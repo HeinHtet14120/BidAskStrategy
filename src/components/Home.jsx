@@ -58,15 +58,15 @@ const Home = () => {
       }
       switch(mode) {
         case 'bid':
-          return 'BID Strategy';
+          return 'Bid Strategy';
         case 'ask':
-          return 'ASK Strategy';
+          return 'Ask Strategy';
         case 'both':
-          return 'BID ASK Strategy';
+          return 'Bid Ask Strategy';
         case 'spots':
-          return 'SPOTS Strategy';
+          return 'Spot Strategy';
         case 'agents':
-          return 'CURVE 4 Dummies';
+          return 'Curve 4 Dummies';
         default:
           return 'Welcome LPs';
       }
@@ -597,7 +597,7 @@ const Home = () => {
     };
   
     return (
-      <div className="absolute w-full h-full top-0 left-0 z-0 py-10 bg-[#0a0b0f] flex items-center justify-center p-2 sm:p-4">
+      <div className="absolute w-full h-full top-0 left-0 z-0 py-10 bg-[#0a0b0f] flex items-center justify-center p-2 sm:p-4" style={{ paddingTop: 'calc(3rem + env(safe-area-inset-top))' }}>
         <div className="w-full flex flex-col lg:flex-row items-center justify-center lg:justify-evenly gap-4 lg:gap-4">
           <div className="flex flex-row lg:flex-col items-center justify-center gap-4 lg:gap-32 order-2 lg:order-1">
             <div onClick={() => window.open('https://x.com/MeteoraAG', '_blank')} className="flex items-center gap-2 cursor-pointer">
@@ -614,18 +614,59 @@ const Home = () => {
             style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 0, 0, 0.1)' }}>
             
               {/* Header */}
-              <div className="mb-4 sm:mb-5">
+              <div className={`mb-4 sm:mb-5 ${mode === 'spots' ? 'pt-6 sm:pt-0' : ''}`}>
                 <div className="flex items-center gap-3">
-                  <h1 className="text-2xl sm:text-4xl bg-gradient-to-r from-[#ff4757] via-[#c44569] to-[#8b5cf6] bg-clip-text text-transparent font-bold" style={{ fontFamily: "'Space Grotesk', 'Inter', 'Poppins', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl bg-gradient-to-r from-[#ff4757] via-[#c44569] to-[#8b5cf6] bg-clip-text text-transparent font-bold" style={{ fontFamily: "'Space Grotesk', 'Inter', 'Poppins', sans-serif", fontWeight: 700, letterSpacing: '-0.02em', lineHeight: '1.2' }}>
                     {getStrategyHeading()}
                   </h1>
                   {mode === 'agents' && (
                     <Link 
                       to="/curve" 
-                      className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-r from-[#ff4757]/20 via-[#c44569]/20 to-[#8b5cf6]/20 border-2 border-[#8b5cf6]/40 hover:border-[#8b5cf6]/70 transition-all duration-300 hover:scale-125 active:scale-100 group cursor-pointer z-10 relative shadow-lg hover:shadow-[#8b5cf6]/50 animate-pulse hover:animate-none"
+                      className="flex items-center justify-center w-11 h-11 sm:w-7 sm:h-7 rounded-full border border-[#8b5cf6]/30 hover:border-[#8b5cf6]/60 transition-all duration-200 hover:scale-110 cursor-pointer z-50 relative"
+                      style={{ touchAction: 'manipulation' }}
                       title="Learn more about Curve strategy"
                     >
-                      <Info className="w-5 h-5 sm:w-6 sm:h-6 text-[#8b5cf6] group-hover:text-[#ff4757] transition-colors duration-300 group-hover:rotate-12" />
+                      <Info className="w-4 h-4 sm:w-4 sm:h-4 text-[#8b5cf6]/70 hover:text-[#8b5cf6] transition-colors duration-200 pointer-events-none" />
+                    </Link>
+                  )}
+                  {mode === 'bid' && (
+                    <Link 
+                      to="/bid" 
+                      className="flex items-center justify-center w-11 h-11 sm:w-7 sm:h-7 rounded-full border border-orange-500/30 hover:border-orange-500/60 transition-all duration-200 hover:scale-110 cursor-pointer z-50 relative"
+                      style={{ touchAction: 'manipulation' }}
+                      title="Learn more about Bid strategy"
+                    >
+                      <Info className="w-4 h-4 sm:w-4 sm:h-4 text-orange-400/70 hover:text-orange-400 transition-colors duration-200 pointer-events-none" />
+                    </Link>
+                  )}
+                  {mode === 'ask' && (
+                    <Link 
+                      to="/ask" 
+                      className="flex items-center justify-center w-11 h-11 sm:w-7 sm:h-7 rounded-full border border-purple-500/30 hover:border-purple-500/60 transition-all duration-200 hover:scale-110 cursor-pointer z-50 relative"
+                      style={{ touchAction: 'manipulation' }}
+                      title="Learn more about Ask strategy"
+                    >
+                      <Info className="w-4 h-4 sm:w-4 sm:h-4 text-purple-400/70 hover:text-purple-400 transition-colors duration-200 pointer-events-none" />
+                    </Link>
+                  )}
+                  {(mode === 'both' || mode === 'combined') && (
+                    <Link 
+                      to="/bidask" 
+                      className="flex items-center justify-center w-11 h-11 sm:w-7 sm:h-7 rounded-full border border-orange-500/30 hover:border-purple-500/60 transition-all duration-200 hover:scale-110 cursor-pointer z-50 relative"
+                      style={{ touchAction: 'manipulation' }}
+                      title="Learn more about Bid/Ask strategy"
+                    >
+                      <Info className="w-4 h-4 sm:w-4 sm:h-4 text-orange-400/70 hover:text-purple-400 transition-colors duration-200 pointer-events-none" />
+                    </Link>
+                  )}
+                  {mode === 'spots' && (
+                    <Link 
+                      to="/spots" 
+                      className="flex items-center justify-center w-11 h-11 sm:w-7 sm:h-7 rounded-full border border-emerald-500/30 hover:border-emerald-500/60 transition-all duration-200 hover:scale-110 cursor-pointer z-50 relative"
+                      style={{ touchAction: 'manipulation' }}
+                      title="Learn more about Spots strategy"
+                    >
+                      <Info className="w-4 h-4 sm:w-4 sm:h-4 text-emerald-400/70 hover:text-emerald-400 transition-colors duration-200 pointer-events-none" />
                     </Link>
                   )}
                 </div>
@@ -683,7 +724,7 @@ const Home = () => {
                 className={`flex items-center justify-center gap-2 px-5 sm:px-7 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 hover:scale-105 active:scale-95 ${
                   !mode
                     ? 'bg-[#0f1015] text-gray-400 border border-gray-800'
-                    : mode === 'combined'
+                    : mode === 'combined' || mode === 'both'
                     ? 'bg-gradient-to-r from-purple-600 to-orange-600 text-white'
                     : mode === 'bid'
                     ? 'bg-orange-600 text-white'
@@ -706,7 +747,7 @@ const Home = () => {
                     <BarChart3 className="w-4 h-4" />
                     <span>Choose Strategy</span>
                   </>
-                ) : mode === 'combined' ? (
+                ) : mode === 'combined' || mode === 'both' ? (
                   <>
                     <BarChart3 className="w-4 h-4" />
                     <TrendingUp className="w-4 h-4" />

@@ -20,7 +20,7 @@ const Curve = () => {
       });
     }, observerOptions);
 
-    const factSections = document.querySelectorAll('.fact-section, .strategy-section, .pool-setup-section');
+    const factSections = document.querySelectorAll('.fact-section, .strategy-section, .pool-setup-section, .facts-no-photo-wrapper');
     factSections.forEach((section, index) => {
       section.style.transitionDelay = `${index * 0.1}s`;
       observer.observe(section);
@@ -50,11 +50,11 @@ const Curve = () => {
         <section className="fact-section">
           <div className="fact-text">
             <div className="fact-number">FACT 01</div>
-            <h2 className="fact-title">Curved prints only when the chart moves</h2>
+            <h2 className="fact-title">Curve prints when massive volume aligns with strong concentration from your position</h2>
             <p className="fact-description">
-              If the chart is sleeping, your P is sleeping too. No price action means no swaps passing through your range. Your position just sits there earning nothing.
+              If the chart is sleeping, your P is sleeping too. It wont thrive in low volume or heavy volatility away from your targeted initial pool price.
             </p>
-            <div className="fact-highlight">💡 Motion = Money</div>
+            <div className="fact-highlight">💡 Motion in your targeted tight range = Money</div>
           </div>
           <div className="fact-graphic">
             <div className="chart-movement">
@@ -119,53 +119,40 @@ const Curve = () => {
           </div>
         </section>
 
-        {/* Fact 3: Curve Levels */}
-        <section className="fact-section">
-          <div className="fact-text">
-            <div className="fact-number">FACT 03</div>
-            <h2 className="fact-title">Curve level = how wild your LP acts</h2>
-            <p className="fact-description">
-              Low curve gives you chill vibes with wider range. High curve? That's chaos, adrenaline, and possible tears. Choose your adventure wisely.
-            </p>
-            <div className="fact-highlight">🎚️ Your Risk Dial</div>
-          </div>
-          <div className="fact-graphic">
-            <div className="curve-levels">
-              <div className="curve-row curve-low">
-                <div className="curve-visual">
-                  <svg viewBox="0 0 80 60">
-                    <path className="curve-line-low" d="M0,50 Q40,30 80,50" />
-                  </svg>
-                </div>
-                <div className="curve-info">
-                  <div className="curve-name">LOW CURVE</div>
-                  <div className="curve-desc">Chill vibes, wider range, steady earner</div>
-                </div>
-                <div className="curve-emoji">😌</div>
-              </div>
-              <div className="curve-row curve-high">
-                <div className="curve-visual">
-                  <svg viewBox="0 0 80 60">
-                    <path className="curve-line-high" d="M0,55 Q40,5 80,55" />
-                  </svg>
-                </div>
-                <div className="curve-info">
-                  <div className="curve-name">HIGH CURVE</div>
-                  <div className="curve-desc">Chaos mode, tight range, max fees OR tears</div>
-                </div>
-                <div className="curve-emoji">🎢</div>
-              </div>
+        {/* Fact 3 & 5: Facts without photos - Side by side */}
+        <div className="facts-no-photo-wrapper">
+          {/* Fact 3: Volume in concentration */}
+          <section className="fact-section fact-no-photo">
+            <div className="fact-text">
+              <div className="fact-number">FACT 03</div>
+              <h2 className="fact-title">Volume in concentration is the whole engine</h2>
+              <p className="fact-description">
+                High volume? Fees go brrrr. Low volume? You're farming dust, bro. The amount of trading activity directly powers your earnings.
+              </p>
+              <div className="fact-highlight">⚡ Volume = Your Paycheck</div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Fact 4: Quickie Tool */}
+          {/* Fact 4: IL Risk */}
+          <section className="fact-section fact-no-photo">
+            <div className="fact-text">
+              <div className="fact-number">FACT 04</div>
+              <h2 className="fact-title">If its price volatility is high outside of your range. your bags get cooked. Impermanent Loss hits harder on concentrated positions.</h2>
+              <p className="fact-description">
+                If its price volatility is high outside of your range. your bags get cooked. Impermanent Loss hits harder on concentrated positions.
+              </p>
+              <div className="fact-highlight">⚠️ Beginners: Stay Low</div>
+            </div>
+          </section>
+        </div>
+
+        {/* Fact 5: Quickie Tool */}
         <section className="fact-section">
           <div className="fact-text">
-            <div className="fact-number">FACT 04</div>
-            <h2 className="fact-title">Curved is a quickie tool</h2>
+            <div className="fact-number">FACT 05</div>
+            <h2 className="fact-title">Curve is a quickie tool</h2>
             <p className="fact-description">
-              Get in when it's popping → dip when it cools off. No loyalty here. This isn't a marriage, it's a tactical rotation strategy.
+              Get in when vol is popping → dip when it cools off. No loyalty here. This isn't a marriage, it's a tactical rotation strategy.
             </p>
             <div className="fact-highlight">🔄 In Fast, Out Faster</div>
           </div>
@@ -184,34 +171,6 @@ const Curve = () => {
                   </div>
                 </div>
                 <div className="timeline-arrow">→</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Fact 5: IL Risk */}
-        <section className="fact-section">
-          <div className="fact-text">
-            <div className="fact-number">FACT 05</div>
-            <h2 className="fact-title">High curve loves IL (in a bad way)</h2>
-            <p className="fact-description">
-              If price trends too long in one direction, your bags get cooked. Impermanent Loss hits harder on concentrated positions. Newbies, stay low.
-            </p>
-            <div className="fact-highlight">⚠️ Beginners: Stay Low</div>
-          </div>
-          <div className="fact-graphic">
-            <div className="il-risk">
-              <div className="risk-meter">
-                <div className="meter-bg"></div>
-                <div className="meter-needle"></div>
-                <div className="meter-center">
-                  <div className="meter-value">IL</div>
-                  <div className="meter-label">RISK LEVEL</div>
-                </div>
-              </div>
-              <div className="risk-warning">
-                <span>⚠️</span>
-                <span>High curve + trending price = cooked bags</span>
               </div>
             </div>
           </div>
@@ -394,15 +353,6 @@ const Curve = () => {
                 <span className="param-value">Depends</span>
               </div>
               <p className="param-desc"><strong>Token's mood</strong> — calm = small, degen = bigger.</p>
-            </div>
-
-            <div className="param-card param-curve">
-              <div className="param-header">
-                <span className="param-icon">📈</span>
-                <span className="param-name">Curve Level</span>
-                <span className="param-value">Dynamic</span>
-              </div>
-              <p className="param-desc"><strong>Chart cooking?</strong> Turn it up. Meh? Keep low.</p>
             </div>
           </div>
 
