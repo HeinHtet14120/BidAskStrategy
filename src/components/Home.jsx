@@ -600,13 +600,13 @@ const Home = () => {
       <div className="absolute w-full h-full top-0 left-0 z-0 py-10 bg-[#0a0b0f] flex items-center justify-center p-2 sm:p-4" style={{ paddingTop: 'calc(3rem + env(safe-area-inset-top))' }}>
         <div className="w-full flex flex-col lg:flex-row items-center justify-center lg:justify-evenly gap-4 lg:gap-4">
           <div className="flex flex-row lg:flex-col items-center justify-center gap-4 lg:gap-32 order-2 lg:order-1">
-            <div onClick={() => window.open('https://x.com/MeteoraAG', '_blank')} className="flex items-center gap-2 cursor-pointer">
-            <img src={metlogo} alt="logo" className="w-20 h-20 sm:w-30 sm:h-30" />
-            <p className="text-white text-lg sm:text-[25px] font-bold">Meteora</p>
+            <div onClick={() => window.open('https://x.com/MeteoraAG', '_blank')} className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
+            <img src={metlogo} alt="logo" className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 object-contain" />
+            <p className="text-white text-base sm:text-lg md:text-xl lg:text-[25px] font-bold">Meteora</p>
             </div>
-            <div onClick={() => window.open('https://x.com/met_lparmy', '_blank')} className="flex items-center gap-2 cursor-pointer">
-            <img src={lplogo} alt="logo" className="w-20 h-20 sm:w-30 sm:h-30" />
-            <p className="text-white text-base sm:text-[22px] font-bold">LP Army</p>
+            <div onClick={() => window.open('https://x.com/met_lparmy', '_blank')} className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
+            <img src={lplogo} alt="logo" className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 object-contain" />
+            <p className="text-white text-sm sm:text-base md:text-lg lg:text-[22px] font-bold">LP Army</p>
             </div>
           </div>
           {/* Dark Enterprise Card */}
@@ -1029,9 +1029,9 @@ const Home = () => {
               className="flex flex-col items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
             >
               <div className="border-2 border-red-900 rounded-full">
-                <img src={luffy} alt="logo" className="w-20 h-20 sm:w-25 sm:h-25 rounded-full" />
+                <img src={luffy} alt="logo" className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full object-cover" />
               </div>
-              <p className="text-white text-sm sm:text-[18px] font-bold">@biginthe4teen</p>
+              <p className="text-white text-xs sm:text-sm md:text-base lg:text-[18px] font-bold">@biginthe4teen</p>
             </div>
             
             <Tooltip
